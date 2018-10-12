@@ -1,0 +1,14 @@
+C:\Users\Administrator\source\repos\NetworkTest\NetworkTest\bin\Debug\NetworkTest.exe.config
+C:\Users\Administrator\source\repos\NetworkTest\NetworkTest\bin\Debug\NetworkTest.exe
+C:\Users\Administrator\source\repos\NetworkTest\NetworkTest\bin\Debug\NetworkTest.pdb
+C:\Users\Administrator\source\repos\NetworkTest\NetworkTest\obj\Debug\NetworkTest.csprojAssemblyReference.cache
+C:\Users\Administrator\source\repos\NetworkTest\NetworkTest\obj\Debug\NetworkTest.csproj.CoreCompileInputs.cache
+C:\Users\Administrator\source\repos\NetworkTest\NetworkTest\obj\Debug\NetworkTest.exe
+C:\Users\Administrator\source\repos\NetworkTest\NetworkTest\obj\Debug\NetworkTest.pdb
+E:\Robotino\Project\NetworkTest\NetworkTest\bin\Debug\NetworkTest.exe.config
+E:\Robotino\Project\NetworkTest\NetworkTest\bin\Debug\NetworkTest.exe
+E:\Robotino\Project\NetworkTest\NetworkTest\bin\Debug\NetworkTest.pdb
+E:\Robotino\Project\NetworkTest\NetworkTest\obj\Debug\NetworkTest.csprojAssemblyReference.cache
+E:\Robotino\Project\NetworkTest\NetworkTest\obj\Debug\NetworkTest.csproj.CoreCompileInputs.cache
+E:\Robotino\Project\NetworkTest\NetworkTest\obj\Debug\NetworkTest.exe
+E:\Robotino\Project\NetworkTest\NetworkTest\obj\Debug\NetworkTest.pdb
