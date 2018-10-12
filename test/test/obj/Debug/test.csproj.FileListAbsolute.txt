@@ -1,0 +1,7 @@
+E:\Robotino\Project\test\test\bin\Debug\test.exe.config
+E:\Robotino\Project\test\test\bin\Debug\test.exe
+E:\Robotino\Project\test\test\bin\Debug\test.pdb
+E:\Robotino\Project\test\test\obj\Debug\test.csprojAssemblyReference.cache
+E:\Robotino\Project\test\test\obj\Debug\test.csproj.CoreCompileInputs.cache
+E:\Robotino\Project\test\test\obj\Debug\test.exe
+E:\Robotino\Project\test\test\obj\Debug\test.pdb
