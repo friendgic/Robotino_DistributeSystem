@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 
@@ -192,7 +193,7 @@ public class AsynchronousClient
 {
     // The port number for the remote device.  
     private const int port = 11000;
-
+    private static Robot robot;
     // AutoResetEvent  instances signal completion.  
     private static AutoResetEvent  connectDone =
         new AutoResetEvent (false);
@@ -204,7 +205,7 @@ public class AsynchronousClient
     // The response from the remote device.  
     private static String response = String.Empty;
 
-    public static void StartClient(string ip, bool listener = false)
+    public static void StartClient(string ip, bool listener = false,Robot bot=null)
     {
         // Connect to a remote device.  
         try
@@ -226,6 +227,11 @@ public class AsynchronousClient
             client.BeginConnect(remoteEP,
                 new AsyncCallback(ConnectCallback), client);
             connectDone.WaitOne();
+
+            if (bot != null)
+            {
+                robot = bot;
+            }
 
             while (true)
             {
@@ -324,6 +330,11 @@ public class AsynchronousClient
                     // client. Display it on the console.  
                     Console.WriteLine("Read {0} bytes from socket. \n Data : {1}",
                         content.Length, content);
+                    if (content.Contains("rot"))
+                    {
+                        robot.Start();
+                    }
+
                     receiveDone.Set();
                     state.Clear();
                 }
@@ -373,4 +384,90 @@ public class AsynchronousClient
     }
 
 
+    
+}
+public class Robot
+{
+
+    [DllImport("rec_robotino_api2.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int Com_construct();
+
+    [DllImport("rec_robotino_api2.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+    public static extern bool Com_setAddress(int id, [MarshalAs(UnmanagedType.LPStr)] string address);
+
+    [DllImport("rec_robotino_api2.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+    public static extern bool Com_connect(int id);
+
+    [DllImport("rec_robotino_api2.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+    public static extern bool Com_destroy(int id);
+
+    [DllImport("rec_robotino_api2.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int OmniDrive_construct();
+
+    [DllImport("rec_robotino_api2.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+    public static extern bool OmniDrive_setComId(int OdometryId, int ComId);
+
+    [DllImport("rec_robotino_api2.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+    public static extern bool OmniDrive_setVelocity(int OmniDriveId, float Vx, float Vy, float Omega);
+
+    [DllImport("rec_robotino_api2.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+    public static extern bool OmniDrive_destroy(int OmniDriveId);
+
+    [DllImport("rec_robotino_api2.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+    public static extern float PowerManagement_voltage(int id);
+    [DllImport("rec_robotino_api2.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int PowerManagement_construct();
+    [DllImport("rec_robotino_api2.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+    public static extern bool PowerManagement_setComId(int id, int comId);
+    [DllImport("rec_robotino_api2.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+    public static extern bool PowerManagement_destroy(int id);
+
+    public int comId, driverID, powerID;
+    public void Init(string ip)
+    {
+         comId = Com_construct();
+        Console.WriteLine("comId={0}", comId);
+
+        //bool ok = Com_setAddress(comId, "127.0.0.1");
+        //bool ok = Com_setAddress(comId, "169.254.7.210");
+        bool ok = Com_setAddress(comId, ip);
+        Console.WriteLine("Com_setAddress returned {0}", ok);
+
+        ok = Com_connect(comId);
+        Console.WriteLine("Com_connect returned {0}", ok);
+
+        driverID = OmniDrive_construct();
+        Console.WriteLine("OmniDrive_construct returned {0}", driverID);
+
+        ok = OmniDrive_setComId(driverID, comId);
+        Console.WriteLine("OmniDrive_setComId returned {0}", ok);
+
+        powerID = PowerManagement_construct();
+        Console.WriteLine("PowerManagement_construct returned {0}", powerID);
+
+        ok = PowerManagement_setComId(powerID, comId);
+        Console.WriteLine("PowerManagement_setComId returned {0}", ok);
+
+
+    }
+
+    ~Robot()
+    {
+        var ok = OmniDrive_destroy(driverID);
+        Console.WriteLine("OmniDrive_destroy returned {0}", ok);
+        Console.ReadKey();
+
+        ok = Com_destroy(comId);
+        Console.WriteLine("Com_destroy returned {0}", ok);
+        Console.ReadKey();
+    }
+    public void Start( )
+    {
+            var ok = OmniDrive_setVelocity(driverID, 0.00f, 0.0f, 1f);
+            Console.WriteLine("OmniDrive_setVelocity returned {0}", ok);
+            var value = PowerManagement_voltage(powerID);
+            Console.WriteLine("PowerManagement_voltage returned {0}", value);
+         
+
+    }
 }

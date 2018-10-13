@@ -12,3 +12,10 @@ E:\Robotino\Project\NetworkTest\NetworkTest\obj\Debug\NetworkTest.csprojAssembly
 E:\Robotino\Project\NetworkTest\NetworkTest\obj\Debug\NetworkTest.csproj.CoreCompileInputs.cache
 E:\Robotino\Project\NetworkTest\NetworkTest\obj\Debug\NetworkTest.exe
 E:\Robotino\Project\NetworkTest\NetworkTest\obj\Debug\NetworkTest.pdb
+D:\Robot\UPload\NetworkTest\NetworkTest\bin\Debug\NetworkTest.exe.config
+D:\Robot\UPload\NetworkTest\NetworkTest\bin\Debug\NetworkTest.exe
+D:\Robot\UPload\NetworkTest\NetworkTest\bin\Debug\NetworkTest.pdb
+D:\Robot\UPload\NetworkTest\NetworkTest\obj\Debug\NetworkTest.csprojAssemblyReference.cache
+D:\Robot\UPload\NetworkTest\NetworkTest\obj\Debug\NetworkTest.csproj.CoreCompileInputs.cache
+D:\Robot\UPload\NetworkTest\NetworkTest\obj\Debug\NetworkTest.exe
+D:\Robot\UPload\NetworkTest\NetworkTest\obj\Debug\NetworkTest.pdb
