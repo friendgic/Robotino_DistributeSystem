@@ -42,6 +42,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DataCompress.cs" />
     <Compile Include="DSDataStructure.cs" />
     <Compile Include="NetworkBase.cs" />
     <Compile Include="NetworkClient.cs" />

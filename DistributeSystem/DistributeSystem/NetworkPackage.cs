@@ -58,14 +58,14 @@ namespace DistributeSystem
             return str;
         }
      
-        public virtual string Serialize()
+        public virtual string SerializeJson()
         {
             string str;
             str = JsonConvert.SerializeObject(this)+ "<EOF>";
             return str;
         }
 
-        public virtual void Deserialize(string data)
+        public virtual void DeserializeJson(string data)
         {
             try
             {

@@ -22,7 +22,7 @@ namespace DistributeSystem
     public class NetworkPackageBin:NetworkPackage
     {
         static public int version = 1;
-        public List<byte> SerializeBin()
+        public virtual byte[] SerializeBin()
         {
             List<byte> buffer = new List<byte>();
             buffer.AddRange(AddHeader());
@@ -39,70 +39,59 @@ namespace DistributeSystem
                 }
 
                 List<byte> adding = new List<byte>();
-                byte count = 0;
                 byte type = 0;
 
                 if (dat is int)
                 {
                     adding = AddInt((int)dat);
-                    count = (byte)adding.Count;
                     type = (byte)DataType.INT;
                 }
                 if (dat is float)
                 {
                     adding = AddFloat((float)dat);
-                    count = (byte)adding.Count;
                     type = (byte)DataType.FLOAT;
                 }
                 if (dat is double)
                 {
                     adding = AddDouble((double)dat);
-                    count = (byte)adding.Count;
                     type = (byte)DataType.DOUBLE;
                 }
                 if (dat is string)
                 {
                     adding = AddString((string)dat);
-                    count = (byte)adding.Count;
                     type = (byte)DataType.STRING;
                 }
                 if (dat is List<int>)
                 {
                     adding = AddListInt((List<int>)dat);
-                    count = (byte)adding.Count;
                     type = (byte)DataType.LIST_INT;
                 }
                 if (dat is List<float>)
                 {
                     adding = AddListFloat((List<float>)dat);
-                    count = (byte)adding.Count;
                     type = (byte)DataType.LIST_FLOAT;
                 }
                 if (dat is List<double>)
                 {
                     adding = AddListDouble((List<double>)dat);
-                    count = (byte)adding.Count;
                     type = (byte)DataType.LIST_DOUBLE;
                 }
                 if (dat is List<byte>)
                 {
                     adding = AddListByte((List<byte>)dat);
-                    count = (byte)adding.Count;
                     type = (byte)DataType.LIST_BYTE;
                 }
                 if (dat is byte)
                 {
                     adding = new List<byte>() { (byte)dat };
-                    count = (byte)adding.Count;
                     type = (byte)DataType.BYTE;
                 }
 
-                buffer.Add(count);
                 buffer.Add(type);
                 buffer.AddRange(adding);
             }
             buffer.AddRange(AddTailer());
-            return buffer;
+            return buffer.ToArray();
         }
          
 
@@ -116,7 +105,6 @@ namespace DistributeSystem
             }
             return buf;
         }
-
         private List<byte> AddListDouble(List<double> dat)
         {
             List<byte> buf = new List<byte>();
@@ -127,7 +115,6 @@ namespace DistributeSystem
             }
             return buf;
         }
-
         private List<byte> AddListFloat(List<float> dat)
         {
             List<byte> buf = new List<byte>();
@@ -138,7 +125,6 @@ namespace DistributeSystem
             }
             return buf;
         }
-
         private List<byte> AddListInt(List<int> dat)
         {
             List<byte> buf = new List<byte>();
@@ -149,7 +135,6 @@ namespace DistributeSystem
             }
             return buf;
         }
-
         private List<byte> AddString(string value)
         {
             char[] chars = value.ToCharArray();
@@ -158,20 +143,21 @@ namespace DistributeSystem
             {
                 byteArray[i] = (byte)chars[i];
             }
-            return new List<byte>(byteArray);
+            var buf = new List<byte>();
+            buf.AddRange(BitConverter.GetBytes(chars.Length));
+            buf.AddRange(byteArray);
+            return buf;
         }
         private List<byte> AddDouble(double value)
         {
             byte[] byteArray = BitConverter.GetBytes(value);
             return new List<byte>(byteArray);
         }
-
         private List<byte> AddFloat(float value)
         {
             byte[] byteArray = BitConverter.GetBytes(value);
             return new List<byte>(byteArray);
         }
-
         private List<byte> AddInt(int value)
         {
             byte[] byteArray = BitConverter.GetBytes(value);
@@ -193,10 +179,10 @@ namespace DistributeSystem
 
         ///////////////////////////Deseriallize/////////////////////////////////////
 
-        public bool DeserializeBin(List<byte> raw)
+        public virtual void DeserializeBin(byte[] raw)
         {
             DataList = new Dictionary<string, object>();
-            if (raw.Count < 2) return false;
+            if (raw.Length < 2) throw new Exception("data count<2")  ;
             version = raw[0];
             var count = raw[1];
             int index = 2;
@@ -210,69 +196,62 @@ namespace DistributeSystem
                 }
                 string name = new string(charString);
 
-                int objLengt = ReadAByte(raw, ref index);
                 DataType type = (DataType)ReadAByte(raw,ref index);
-
-                byte[] objbyte = new byte[objLengt];
-                for(int l = 0; l < objLengt; l++)
-                {
-                    objbyte[l] = ReadAByte(raw, ref index);
-                }
-
 
                 switch (type)
                 {
                     case DataType.INT:
                         {
-                            var dat = ReadAInt(objbyte);
+                            var dat = ReadAInt(raw,ref index);
                             DataList.Add(name, dat);
                         }
                         break;
                     case DataType.FLOAT:
                         {
-                            var dat = ReadAFloat(objbyte);
+                            var dat = ReadAFloat(raw,ref index);
                             DataList.Add(name, dat);
                         }
                         break;
                     case DataType.DOUBLE:
                         {
-                            var dat = ReadADouble(objbyte);
+                            var dat = ReadADouble(raw, ref index);
                             DataList.Add(name, dat);
                         }
                         break;
                     case DataType.STRING:
                         {
-                            var dat = ReadAString(objbyte);
+                            var dat = ReadAString(raw, ref index);
                             DataList.Add(name, dat);
                         }
                         break;
                     case DataType.LIST_INT:
                         {
-                            var dat = ReadALInt(objbyte);
+                            var dat = ReadALInt(raw, ref index);
                             DataList.Add(name, dat);
                         }
                         break;
                     case DataType.LIST_FLOAT:
                         {
-                            var dat = ReadALFloat(objbyte);
+                            var dat = ReadALFloat(raw, ref index);
                             DataList.Add(name, dat);
                         }
                         break;
                     case DataType.LIST_DOUBLE:
                         {
-                            var dat = ReadALDouble(objbyte);
+                            var dat = ReadALDouble(raw, ref index);
                             DataList.Add(name, dat);
                         }
                         break;
                     case DataType.LIST_BYTE:
                         {
-                            var dat = ReadALByte(objbyte);
+                            var dat = ReadALByte(raw, ref index);
                             DataList.Add(name, dat);
                         }
                         break;
                     case DataType.BYTE:
                         {
-                            var dat = objbyte[0];
+                            var dat = ReadAByte(raw, ref index);
+
                             DataList.Add(name, dat);
                         }
                         break;
@@ -280,78 +259,86 @@ namespace DistributeSystem
             }
 
             var tailer = ReadAByte(raw, ref index);
-            if (tailer != 0xFF) return false;
-            return true;
+            if (tailer != 0xFF) throw new Exception("data tailer error");
+           
         }
-        private List<byte> ReadALByte(byte[] objbyte)
+        private List<byte> ReadALByte(byte[] objbyte, ref int index)
         {
             List<byte> buf = new List<byte>();
-            int count = BitConverter.ToInt32(objbyte, 0);
+            int count = ReadAInt(objbyte, ref index);
             for (int i = 0; i < count; i++)
             {
-                var one = objbyte[4 + i * sizeof(byte)];
+                var one = ReadAByte(objbyte, ref index);
                 buf.Add(one);
             }
             return buf;
         }
-        private List<double> ReadALDouble(byte[] objbyte)
+        private List<double> ReadALDouble(byte[] objbyte, ref int index)
         {
             List<double> buf = new List<double>();
-            int count = BitConverter.ToInt32(objbyte, 0);
+            int count = ReadAInt(objbyte, ref index);
             for (int i = 0; i < count; i++)
             {
-                var one = BitConverter.ToDouble(objbyte, 4+i * sizeof(double));
+                var one = ReadADouble(objbyte, ref index);
                 buf.Add(one);
             }
             return buf;
         }
 
-        private List<float> ReadALFloat(byte[] objbyte)
+        private List<float> ReadALFloat(byte[] objbyte, ref int index)
         {
             List<float> buf = new List<float>();
-            int count = BitConverter.ToInt32(objbyte, 0);
+            int count = ReadAInt(objbyte,ref index);
             for (int i = 0; i < count; i++)
             {
-                var one = BitConverter.ToSingle(objbyte, 4+i * sizeof(float));
+                var one = ReadAFloat(objbyte,ref index);
                 buf.Add(one);
             }
             return buf;
         }
-        private List<int> ReadALInt(byte[] objbyte)
+        private List<int> ReadALInt(byte[] objbyte, ref int index)
         {
             List<int> buf = new List<int>();
-            int count = BitConverter.ToInt32(objbyte, 0);
+            int count = ReadAInt(objbyte, ref index);
             for (int i = 0; i < count; i++)
             {
-                var one = BitConverter.ToInt32(objbyte, 4 + i * sizeof(int));
+                var one = ReadAInt(objbyte,ref index);
                 buf.Add(one);
             }
             return buf;
         }
 
-        private string ReadAString(byte[] objbyte)
+        private string ReadAString(byte[] objbyte, ref int index)
         {
-            char[] chars = new char[objbyte.Length];
+            int length = ReadAInt(objbyte, ref index);
+
+            char[] chars = new char[length];
             for(int i = 0; i < chars.Length; i++)
             {
-                chars[i] = (char)objbyte[i];
+                chars[i] = (char)ReadAByte(objbyte,ref index);
             }
             string str = new string(chars);
             return str;
         }
-        private double ReadADouble(byte[] objbyte)
+        private double ReadADouble(byte[] objbyte, ref int index)
         {
-            return BitConverter.ToDouble(objbyte, 0);
+            var value = BitConverter.ToDouble(objbyte, index);
+            index += sizeof(double);
+            return value;
         }
-        private float ReadAFloat(byte[] objbyte)
+        private float ReadAFloat(byte[] objbyte, ref int index)
         {
-            return BitConverter.ToSingle(objbyte, 0);
+            var value = BitConverter.ToSingle(objbyte, index);
+            index = index + sizeof(float);
+            return value;
         }
-        private int ReadAInt(byte[] objbyte)
+        private int ReadAInt(byte[] objbyte,ref int index)
         {
-            return BitConverter.ToInt32(objbyte, 0);
+            var value = BitConverter.ToInt32(objbyte, index);
+            index = index + sizeof(int);
+            return value;
         }
-        private byte ReadAByte(List<byte>raw,ref int index)
+        private byte ReadAByte(byte[]raw,ref int index)
         {
             return raw[index++];
         }

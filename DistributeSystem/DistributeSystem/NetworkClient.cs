@@ -206,7 +206,7 @@ namespace DistributeSystem
             base.ReceiveFinsh(state);
             var content = state.sb.ToString();
             NetworkPackage np = new NetworkPackage();
-            np.Deserialize(content);
+            np.DeserializeJson(content);
             var dat = np.Get<List<string>>("ConnectedIPs");
             if (dat != null)
             {

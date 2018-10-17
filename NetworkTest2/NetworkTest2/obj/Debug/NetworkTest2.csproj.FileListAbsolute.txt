@@ -15,3 +15,14 @@ E:\Robotino\Project2\NetworkTest2\NetworkTest2\obj\Debug\NetworkTest2.csproj.Cor
 E:\Robotino\Project2\NetworkTest2\NetworkTest2\obj\Debug\NetworkTest2.csproj.CopyComplete
 E:\Robotino\Project2\NetworkTest2\NetworkTest2\obj\Debug\NetworkTest2.exe
 E:\Robotino\Project2\NetworkTest2\NetworkTest2\obj\Debug\NetworkTest2.pdb
+D:\Robot\UPload\NetworkTest2\NetworkTest2\obj\Debug\NetworkTest2.csprojAssemblyReference.cache
+D:\Robot\UPload\NetworkTest2\NetworkTest2\obj\Debug\NetworkTest2.csproj.CoreCompileInputs.cache
+D:\Robot\UPload\NetworkTest2\NetworkTest2\bin\Debug\NetworkTest2.exe.config
+D:\Robot\UPload\NetworkTest2\NetworkTest2\bin\Debug\NetworkTest2.exe
+D:\Robot\UPload\NetworkTest2\NetworkTest2\bin\Debug\NetworkTest2.pdb
+D:\Robot\UPload\NetworkTest2\NetworkTest2\bin\Debug\DistributeSystem.dll
+D:\Robot\UPload\NetworkTest2\NetworkTest2\bin\Debug\Newtonsoft.Json.dll
+D:\Robot\UPload\NetworkTest2\NetworkTest2\bin\Debug\DistributeSystem.pdb
+D:\Robot\UPload\NetworkTest2\NetworkTest2\obj\Debug\NetworkTest2.csproj.CopyComplete
+D:\Robot\UPload\NetworkTest2\NetworkTest2\obj\Debug\NetworkTest2.exe
+D:\Robot\UPload\NetworkTest2\NetworkTest2\obj\Debug\NetworkTest2.pdb

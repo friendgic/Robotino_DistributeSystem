@@ -174,7 +174,7 @@ namespace DistributeSystem
             base.ReceiveFinsh(state);
             var content = state.sb.ToString();
             NetworkPackage np = new NetworkPackage();
-            np.Deserialize(content);
+            np.DeserializeJson(content);
             var cmd = np.Get<string>("CMD");
             if (cmd != null)
             {
@@ -265,7 +265,7 @@ namespace DistributeSystem
         {
             if (!packageNeedToSend.isEmpty())
             {
-                var str = packageNeedToSend.Serialize();
+                var str = packageNeedToSend.SerializeJson();
                 for (int i = 0; i < stateObjectList.Count; i++)
                 {
                     var item = stateObjectList[i];

@@ -166,7 +166,7 @@ namespace DistributeSystem
         {
             if (!packageNeedToSend.isEmpty())
             {
-                var str = packageNeedToSend.Serialize();
+                var str = packageNeedToSend.SerializeJson();
                 Send(handler, str);
                 packageNeedToSend.Reset();
             }

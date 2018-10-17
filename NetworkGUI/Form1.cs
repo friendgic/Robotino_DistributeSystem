@@ -186,33 +186,62 @@ namespace NetworkGUI
             var testList2 = new List<float>() { 1.2131f, 2.213122f, 3.3213f };
             var testList3 = new List<double>() { 1.1231, 2.3122, 3.33324 };
             var testList4 = new List<byte>() { 133, 232, 32, 41 };
+
+            var testImage = new byte[1024 * 1024 * 4 * 4];//1024*1024 RGBA float
+            byte xor = 0;
+            for (int i = 0; i < 1024*1024*4*4; i++)
+            {
+                byte dat=(byte)(i % 255); //random value
+                testImage[i] = dat;
+                xor =(byte)((int) xor ^ (int)dat);
+            }
+            var compressImage=DataCompress.ZipBin(testImage);
+
             np.Add("test4", testList);
             np.Add("test5", testList2);
             np.Add("test6", testList3);
             np.Add("test7", testList4);
 
-       
+            np.Add("image", new List<byte>( compressImage));
 
             DateTime t = DateTime.Now;
-            var dat = np.Serialize();
-            var datComp = np.Zip(dat);
-            NetworkPackageBin npjson = new NetworkPackageBin();
-            npjson.Deserialize(dat);
+            var jsonOriData = np.SerializeJson();
+            NetworkPackageCompress npjson = new NetworkPackageCompress();
+            npjson.DeserializeJson(jsonOriData);
             DateTime t2 = DateTime.Now;
             double djson = (t2 - t).TotalMilliseconds;
              
             t = DateTime.Now;
-            var dat2 = np.SerializeBin();
-            var dat2Com = np.ZipBin(dat2.ToArray());
-            NetworkPackageBin np2 = new NetworkPackageBin();
-            np2.DeserializeBin(dat2);
+            var binOriData = np.SerializeBin();
+            NetworkPackageCompress np2 = new NetworkPackageCompress();
+            np2.DeserializeBin(binOriData);
             t2 = DateTime.Now;
             double dbin = (t2 - t).TotalMilliseconds;
 
-            var test = np2.Get<byte>("testb");
+            var test = np2.Get<List<byte>>("image");
+            var deCompress=DataCompress.UnzipBin(test.ToArray());
+            byte xor2 = 0;
+            for (int i = 0; i < deCompress.Length; i++)
+            {
+                byte dat = deCompress[i];
+                xor2 = (byte)((int)xor2 ^ (int)dat);
+            }
 
-            MessageBox.Show(djson.ToString() + "\n"
-                                            + dbin.ToString() + "\n" + test.ToString());
+
+            string str = "Package test, \n" +
+                "Data: 1024*1024 RGBAImage + 7 test data\n" +
+                "Image:\t\t " + testImage.Length + " [bytes]\n" +
+                "Compress:\t" + compressImage.Length + " [bytes]\n" +
+                "-------Json------\n" +
+                "Compress:\t" + jsonOriData.Length + " [bytes]\n" +
+                "Using Time:\t" + djson.ToString() + "\n" +
+                "-------Bin-------\n" +
+                "Compress:\t" + binOriData.Length + " [bytes]\n" +
+                "Using Time:\t" + dbin.ToString() + "\n" +
+                "-------Image Xor Test------\n" +
+                "Result:\t" + testImage.Length+ " [bytes]/" + deCompress.Length+ " [bytes]\n" +
+                "XOR:\t" + (xor==xor2).ToString();
+            MessageBox.Show(str);
         }
 
         private void SendToALL_Button(object sender, EventArgs e)

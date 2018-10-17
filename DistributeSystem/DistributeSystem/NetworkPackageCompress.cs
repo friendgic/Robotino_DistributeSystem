@@ -7,63 +7,30 @@ using System.Text;
 
 namespace DistributeSystem
 {
-    public class NetworkPackageCompress:NetworkPackageBin
+    public class NetworkPackageCompress : NetworkPackageBin
     {
-        public   void CopyTo(Stream src, Stream dest)
+        public new byte[] SerializeJson()
         {
-            byte[] bytes = new byte[4096];
-
-            int cnt;
-
-            while ((cnt = src.Read(bytes, 0, bytes.Length)) != 0)
-            {
-                dest.Write(bytes, 0, cnt);
-            }
+            var ori= base.SerializeJson();
+            var zip=DataCompress. Zip(ori);
+            return zip;
         }
-        public   byte[] Zip(string str)
+        public new byte[] SerializeBin()
         {
-            var bytes = Encoding.UTF8.GetBytes(str);
-
-            using (var msi = new MemoryStream(bytes))
-            using (var mso = new MemoryStream())
-            {
-                using (var gs = new GZipStream(mso, CompressionMode.Compress))
-                {
-                    //msi.CopyTo(gs);
-                    CopyTo(msi, gs);
-                }
-
-                return mso.ToArray();
-            }
-        }
-        public byte[] ZipBin(byte[] bytes)
-        {
-            using (var msi = new MemoryStream(bytes))
-            using (var mso = new MemoryStream())
-            {
-                using (var gs = new GZipStream(mso, CompressionMode.Compress))
-                {
-                    //msi.CopyTo(gs);
-                    CopyTo(msi, gs);
-                }
-
-                return mso.ToArray();
-            }
+            var ori=base.SerializeBin();
+            var zip = DataCompress.ZipBin(ori);
+            return zip;
         }
 
-        public string Unzip(byte[] bytes)
+        public void DeserializeJson(byte[] zipData)
         {
-            using (var msi = new MemoryStream(bytes))
-            using (var mso = new MemoryStream())
-            {
-                using (var gs = new GZipStream(msi, CompressionMode.Decompress))
-                {
-                    //gs.CopyTo(mso);
-                    CopyTo(gs, mso);
-                }
-
-                return Encoding.UTF8.GetString(mso.ToArray());
-            }
+            var unZip = DataCompress.Unzip(zipData);
+            base.DeserializeJson(unZip);
+        }
+        public new void DeserializeBin(byte[] zipData)
+        {
+            var unZip = DataCompress.UnzipBin(zipData);
+            base.DeserializeBin(unZip);
         }
     }
 }
