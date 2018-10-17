@@ -47,6 +47,7 @@
     <Compile Include="NetworkClient.cs" />
     <Compile Include="NetworkPackage.cs" />
     <Compile Include="NetworkPackageBin.cs" />
+    <Compile Include="NetworkPackageCompress.cs" />
     <Compile Include="NetworkServer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

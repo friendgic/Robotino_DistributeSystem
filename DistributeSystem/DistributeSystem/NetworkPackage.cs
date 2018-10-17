@@ -92,7 +92,7 @@ namespace DistributeSystem
             return DataList[name];
         }
 
-        public T Get<T>(string name)
+        public virtual T Get<T>(string name)
         {
             object obj = Get(name);
             if (obj != null)

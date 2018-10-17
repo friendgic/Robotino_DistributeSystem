@@ -8,6 +8,9 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DistributeSystem", "..\DistributeSystem\DistributeSystem\DistributeSystem.csproj", "{239F02AB-DF2C-4918-B61D-F851F51FEA6F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetworkGUI", "..\NetworkGUI\NetworkGUI.csproj", "{957CB19D-3454-424C-BD8F-EFC37A3D8C44}"
+	ProjectSection(ProjectDependencies) = postProject
+		{239F02AB-DF2C-4918-B61D-F851F51FEA6F} = {239F02AB-DF2C-4918-B61D-F851F51FEA6F}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
