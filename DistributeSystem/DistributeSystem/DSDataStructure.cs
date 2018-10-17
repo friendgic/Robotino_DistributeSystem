@@ -20,7 +20,8 @@ namespace DistributeSystem
         ClientClose,
         ClientSend,
         ServerSend,
-        ServerBoardCast
+        ServerBoardCast,
+        ServerMultiSend
     }
     public enum DSEvent
     {
@@ -49,13 +50,12 @@ namespace DistributeSystem
         // Receive buffer.  
         public byte[] buffer = new byte[BufferSize];
         // Received data string.  
-        public StringBuilder sb = new StringBuilder();
+        public List<byte> data = new List<byte>();
 
         public void Clear()
         {
             buffer = new byte[BufferSize];
-            sb = new StringBuilder();
-
+            data = new List<byte>();
         }
     }
 }

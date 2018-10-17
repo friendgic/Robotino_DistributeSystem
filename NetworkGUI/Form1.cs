@@ -17,10 +17,21 @@ namespace NetworkGUI
         private NetworkClient client;
         private bool init = false;
 
+        private int historyLength=17;
+
         public Form1()
         {
             InitializeComponent();
             timer2.Start();
+            msgListView.BeginUpdate();
+            msgListView.Items.Clear();
+
+            for (int i = historyLength; i >= 0; i--)
+            { 
+                msgListView.Items.Add("");
+            }
+            msgListView.EndUpdate();
+
         }
 
 
@@ -186,6 +197,7 @@ namespace NetworkGUI
             var testList2 = new List<float>() { 1.2131f, 2.213122f, 3.3213f };
             var testList3 = new List<double>() { 1.1231, 2.3122, 3.33324 };
             var testList4 = new List<byte>() { 133, 232, 32, 41 };
+            var testList5 = new List<string>() { "abc", "ddd" };
 
             var testImage = new byte[1024 * 1024 * 4 * 4];//1024*1024 RGBA float
             byte xor = 0;
@@ -201,6 +213,7 @@ namespace NetworkGUI
             np.Add("test5", testList2);
             np.Add("test6", testList3);
             np.Add("test7", testList4);
+            np.Add("test8", testList5);
 
             np.Add("image", new List<byte>( compressImage));
 
@@ -227,6 +240,7 @@ namespace NetworkGUI
                 xor2 = (byte)((int)xor2 ^ (int)dat);
             }
 
+            var testResult = np2.Get<List<string>>("test8");
 
             string str = "Package test, \n" +
                 "Data: 1024*1024 RGBAImage + 7 test data\n" +
@@ -254,6 +268,10 @@ namespace NetworkGUI
                     MessageBox.Show("Send CMD Error");
                 }
             }
+            if (server != null)
+            {
+                server.sendCommandToAll(cmd);
+            }
         }
 
         private void timer2_Tick(object sender, EventArgs e)
@@ -271,18 +289,14 @@ namespace NetworkGUI
             {
                 return;
             }
-            msgListView.BeginUpdate();
-            msgListView.Items.Clear();
-
-            for (int i = list.Count - 1; i >= 0; i--)
-            {
-                var item = list[i];
-                ListViewItem it = new ListViewItem(item);
-
-                msgListView.Items.Add(item);
+          
+            for(int i = 0; i < historyLength; i++)
+            { 
+                if (i < list.Count)
+                    msgListView.Items[i] = list[i];
+                else
+                    msgListView.Items[i] = "";
             }
-            msgListView.EndUpdate();
-
         }
 
         private void checkBox2_CheckedChanged(object sender, EventArgs e)
@@ -295,6 +309,20 @@ namespace NetworkGUI
             else
             {
                 timer2.Stop();
+            }
+        }
+
+        private void SendToSpecialIP(object sender, EventArgs e)
+        {
+            string ip = selectedIP_Text.Text;
+            var cmd = Command_text.Text;
+            if (client != null)
+            {
+                client.SendCommandToIP(ip, cmd);
+            }
+            if (server != null)
+            {
+                server.sendcommandToIP(ip, cmd);
             }
         }
     }

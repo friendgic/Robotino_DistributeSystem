@@ -22,8 +22,9 @@ namespace DistributeSystem
         public Queue<string> MsgQueue = new Queue<string>();
         private object locker = new object();
         public NetworkConfig config;
-        public NetworkPackage packageNeedToSend = new NetworkPackage();
+        public NetworkPackageCompress packageNeedToSend = new NetworkPackageCompress();
 
+        public int MsgQueueLength = 15;
         #endregion
 
         #region Thread
@@ -104,11 +105,8 @@ namespace DistributeSystem
         }
         public void ReadCallback(IAsyncResult ar)
         {
-
             String content = String.Empty;
 
-            // Retrieve the state object and the handler socket  
-            // from the asynchronous state object.  
             StateObject state = (StateObject)ar.AsyncState;
             Socket handler = state.workSocket;
             try
@@ -116,27 +114,35 @@ namespace DistributeSystem
                 // Read data from the client socket.   
                 int bytesRead = handler.EndReceive(ar);
 
-                if (bytesRead > 0)
+                if (bytesRead > 4)
                 {
+                    int length = BitConverter.ToInt32(state.buffer, 0);
+                    
                     // There  might be more data, so store the data received so far.  
-                    state.sb.Append(Encoding.ASCII.GetString(
-                        state.buffer, 0, bytesRead));
-
-                    // Check for end-of-file tag. If it is not there, read   
-                    // more data.  
-                    content = state.sb.ToString();
-                    var endpos = content.IndexOf("<EOF>");
-                    if (endpos> -1)
+                    byte[] usefulData = new byte[bytesRead];
+                    for(int i = 0; i < bytesRead; i++)
                     {
-                        state.sb.Remove(endpos, 5);//remove <EOF>
-                        ReceiveFinsh(state);
-                        state.Clear();
+                        usefulData[i] = state.buffer[i];
                     }
+                    state.data.AddRange(usefulData);
 
-                    // Not all data received. Get more.  
-                    handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
-                    new AsyncCallback(ReadCallback), state);
+                    if (bytesRead >= length)
+                    {
+                            ReceiveFinsh(state);
+                            state.Clear();
+                    }
+                    else
+                    {
+                     
+                    }
                 }
+                else
+                {
+                    return;
+                }
+                handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
+                                                           new AsyncCallback(ReadCallback), state);
+
 
             }
             catch (Exception e)
@@ -147,7 +153,7 @@ namespace DistributeSystem
                 {
                     handler.Shutdown(SocketShutdown.Both);
                     handler.Close();
-
+                    state.Clear();
                 }
                 catch (Exception)
                 {
@@ -158,28 +164,29 @@ namespace DistributeSystem
         }
         public virtual void ReceiveFinsh(StateObject state)
         {
-            var content = state.sb.ToString();
-            Console.WriteLine("Read {0} bytes from socket. \n Data : {1}",
-                   content.Length, content);
+            //remove 4 byte of the length infor
+            state.data.RemoveRange(0, 4);
         }
         public void SendPackages(Socket handler)
         {
             if (!packageNeedToSend.isEmpty())
             {
-                var str = packageNeedToSend.SerializeJson();
-                Send(handler, str);
+                var dat = packageNeedToSend.SerializeBin();
+                var byteList = new List<byte>();
+                var length = dat.Length;
+                var lengthBytes = BitConverter.GetBytes((length+4));
+                byteList.AddRange(lengthBytes);
+                byteList.AddRange(dat);
+                Send(handler, byteList.ToArray());
                 packageNeedToSend.Reset();
             }
         }
-        public virtual bool Send(Socket handler, string data)
+        public virtual bool Send(Socket handler,byte[] byteData)
         {
             try
             {
-
-            // Convert the string data to byte data using ASCII encoding.  
-            byte[] byteData = Encoding.ASCII.GetBytes(data);
-
             // Begin sending the data to the remote device.  
+
             handler.BeginSend(byteData, 0, byteData.Length, 0,
                 new AsyncCallback(SendCallback), handler);
 
@@ -266,7 +273,7 @@ namespace DistributeSystem
         }
         public void AddMsg(string msg)
         {
-            if (MsgQueue.Count > 20) MsgQueue.Dequeue();
+            if (MsgQueue.Count > MsgQueueLength) MsgQueue.Dequeue();
             MsgQueue.Enqueue(msg);
         }
         #endregion

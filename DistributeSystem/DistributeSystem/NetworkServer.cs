@@ -52,14 +52,16 @@ namespace DistributeSystem
                     break;
                 case MyTask.ServerSend:
                     SendPackages(packageNeedToSend._target);
-                    break;
+                    break; 
                 case MyTask.ServerBoardCast:
                     BoardCast();
+                    break;
+                case MyTask.ServerMultiSend:
+                    MultiSend();
                     break;
             }
         }
 
-    
 
         public void Close()
         {
@@ -171,10 +173,9 @@ namespace DistributeSystem
         //Decode Incomming package
         public override void ReceiveFinsh(StateObject state)
         {
-            base.ReceiveFinsh(state);
-            var content = state.sb.ToString();
-            NetworkPackage np = new NetworkPackage();
-            np.DeserializeJson(content);
+            base.ReceiveFinsh(state); 
+            NetworkPackageCompress np = new NetworkPackageCompress();
+            np.DeserializeBin(state.data.ToArray());
             var cmd = np.Get<string>("CMD");
             if (cmd != null)
             {
@@ -188,15 +189,41 @@ namespace DistributeSystem
                         SetNextTask(MyTask.ServerSend);
                         break;
                     case "SendCMDtoALL":
-                        var dat = np.Get<string>("DAT");
-                        packageNeedToSend.Add("DAT", dat);
-                        SetNextTask(MyTask.ServerBoardCast);
+                        {
 
+                        var dat = np.Get<string>("DAT");
+                        packageNeedToSend.Add("CMD", dat);
+                        SetNextTask(MyTask.ServerBoardCast);
+                        }
+                        break;
+                    case "SendCMDtoIP":
+                        {
+                            var dat = np.Get<string>("DAT");
+                            var ip = np.Get<string>("IP");
+                            var sockets = GetSocketsByIP(ip);
+                            packageNeedToSend.Add("CMD", dat);
+                            packageNeedToSend.SetTargets(sockets); 
+                            SetNextTask(MyTask.ServerMultiSend);
+                        }
                         break;
                 }
             }
         }
     
+        private List<Socket> GetSocketsByIP(string ip)
+        { 
+            List<Socket> result = new List<Socket>();
+            for (int i = 0; i < stateObjectList.Count; i++)
+            {
+                var item = stateObjectList[i];
+                var s = item.workSocket;
+                IPEndPoint localIpEndPoint = s.RemoteEndPoint as IPEndPoint;
+                var str = localIpEndPoint.Address.ToString();
+                if(str==ip)
+                result.Add(s);
+            }
+            return result;
+        }
         private void CheckClients()
         {
             int i = 0;
@@ -246,6 +273,61 @@ namespace DistributeSystem
                 i++;
             }
         }
+        private void BoardCast()
+        {
+            CheckClients();
+            if (!packageNeedToSend.isEmpty())
+            {
+                var dat = packageNeedToSend.SerializeBin();
+                var byteList = new List<byte>();
+                var length = dat.Length;
+                var lengthBytes = BitConverter.GetBytes((length + 4));
+                byteList.AddRange(lengthBytes);
+                byteList.AddRange(dat);
+
+                var array = byteList.ToArray();
+                for (int i = 0; i < stateObjectList.Count; i++)
+                {
+                    var item = stateObjectList[i];
+                    var socket = item.workSocket;
+                    Send(socket, array);
+                }
+                packageNeedToSend.Reset();
+            }
+        }
+        private void MultiSend()
+        {
+            CheckClients();
+            if (!packageNeedToSend.isEmpty())
+            {
+                var dat = packageNeedToSend.SerializeBin();
+                var byteList = new List<byte>();
+                var length = dat.Length;
+                var lengthBytes = BitConverter.GetBytes((length + 4));
+                byteList.AddRange(lengthBytes);
+                byteList.AddRange(dat);
+
+                var array = byteList.ToArray();
+                for (int i = 0; i < packageNeedToSend._targets.Count; i++)
+                {
+                    var socket = packageNeedToSend._targets[i];
+                    Send(socket, array);
+                }
+                packageNeedToSend.Reset();
+            }
+        }
+
+        public void sendcommandToIP(string ip, string cmd)
+        {
+            var dat = cmd; 
+            var sockets = GetSocketsByIP(ip);
+            packageNeedToSend.Add("CMD", dat);
+            packageNeedToSend.SetTargets(sockets);
+            SetNextTask(MyTask.ServerMultiSend);
+        }
+        #endregion
+        #region Interface
+
         public List<string> GetConnectedIP()
         {
             CheckClients();
@@ -260,21 +342,11 @@ namespace DistributeSystem
             }
             return list;
         }
-
-        private void BoardCast()
+        public void sendCommandToAll(string cmd)
         {
-            if (!packageNeedToSend.isEmpty())
-            {
-                var str = packageNeedToSend.SerializeJson();
-                for (int i = 0; i < stateObjectList.Count; i++)
-                {
-                    var item = stateObjectList[i];
-                    var socket = item.workSocket;
-                    Send(socket,str);
-                }
-            }
+            packageNeedToSend.Add("CMD", cmd);
+            SetNextTask(MyTask.ServerBoardCast);
         }
         #endregion
-
     }
 }

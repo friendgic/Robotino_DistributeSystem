@@ -15,11 +15,19 @@ namespace DistributeSystem
             var zip=DataCompress. Zip(ori);
             return zip;
         }
-        public new byte[] SerializeBin()
+        public byte[] SerializeBin(bool compress)
         {
             var ori=base.SerializeBin();
+            if (compress)
+            {
             var zip = DataCompress.ZipBin(ori);
-            return zip;
+                return zip;
+            }
+            else
+            {
+            return ori;
+
+            }
         }
 
         public void DeserializeJson(byte[] zipData)
@@ -27,10 +35,17 @@ namespace DistributeSystem
             var unZip = DataCompress.Unzip(zipData);
             base.DeserializeJson(unZip);
         }
-        public new void DeserializeBin(byte[] zipData)
+        public void DeserializeBin(byte[] oriData,bool depress)
         {
-            var unZip = DataCompress.UnzipBin(zipData);
+            if (depress)
+            {
+            var unZip = DataCompress.UnzipBin(oriData);
             base.DeserializeBin(unZip);
+            }
+            else
+            {
+                base.DeserializeBin(oriData);
+            }
         }
     }
 }

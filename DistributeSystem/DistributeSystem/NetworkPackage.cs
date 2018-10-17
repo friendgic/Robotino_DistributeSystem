@@ -13,13 +13,21 @@ namespace DistributeSystem
         //[JsonProperty]
         public Dictionary<string, object> DataList;
         private Socket targetSocket;
-        
+        private List<Socket> targetSockets;
+
         [JsonIgnore]
         public Socket _target { get { return targetSocket; } }
+
+        [JsonIgnore]
+        public List<Socket> _targets { get { return targetSockets; } }
 
         public void SetTarget(Socket target)
         {
             targetSocket = target;
+        }
+        public void SetTargets(List<Socket> targets)
+        {
+            targetSockets = targets;
         }
         public NetworkPackage()
         {
@@ -32,7 +40,8 @@ namespace DistributeSystem
         public void Reset()
         {
             DataList = new Dictionary<string, object>();
-
+            SetTarget(null);
+            SetTargets(null);
         }
  
         public void Add(string name, Object obj)

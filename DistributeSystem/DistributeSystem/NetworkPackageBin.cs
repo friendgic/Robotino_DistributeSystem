@@ -17,6 +17,7 @@ namespace DistributeSystem
         LIST_FLOAT,
         LIST_DOUBLE,
         LIST_BYTE,
+        LIST_STRING,
         BYTE
     }
     public class NetworkPackageBin:NetworkPackage
@@ -41,6 +42,7 @@ namespace DistributeSystem
                 List<byte> adding = new List<byte>();
                 byte type = 0;
 
+                
                 if (dat is int)
                 {
                     adding = AddInt((int)dat);
@@ -81,6 +83,11 @@ namespace DistributeSystem
                     adding = AddListByte((List<byte>)dat);
                     type = (byte)DataType.LIST_BYTE;
                 }
+                if(dat is List<string>)
+                {
+                    adding = AddListString((List<string>)dat);
+                    type = (byte)DataType.LIST_STRING;
+                }
                 if (dat is byte)
                 {
                     adding = new List<byte>() { (byte)dat };
@@ -93,8 +100,18 @@ namespace DistributeSystem
             buffer.AddRange(AddTailer());
             return buffer.ToArray();
         }
-         
 
+
+        private List<byte> AddListString(List<string> dat)
+        {
+            List<byte> buf = new List<byte>();
+            buf.AddRange(BitConverter.GetBytes(dat.Count));
+            for (int i = 0; i < dat.Count; i++)
+            {
+                buf.AddRange(AddString(dat[i]));
+            }
+            return buf;
+        }
         private List<byte> AddListByte(List<byte> dat)
         {
             List<byte> buf = new List<byte>();
@@ -248,10 +265,15 @@ namespace DistributeSystem
                             DataList.Add(name, dat);
                         }
                         break;
+                    case DataType.LIST_STRING:
+                        {
+                            var dat = ReadALString(raw, ref index);
+                            DataList.Add(name, dat);
+                        }
+                        break;
                     case DataType.BYTE:
                         {
                             var dat = ReadAByte(raw, ref index);
-
                             DataList.Add(name, dat);
                         }
                         break;
@@ -260,8 +282,20 @@ namespace DistributeSystem
 
             var tailer = ReadAByte(raw, ref index);
             if (tailer != 0xFF) throw new Exception("data tailer error");
-           
+
         }
+        private List<string> ReadALString(byte[] objbyte, ref int index)
+        {
+            List<string> buf = new List<string>();
+            int count = ReadAInt(objbyte, ref index);
+            for (int i = 0; i < count; i++)
+            {
+                var one = ReadAString(objbyte, ref index);
+                buf.Add(one);
+            }
+            return buf;
+        }
+
         private List<byte> ReadALByte(byte[] objbyte, ref int index)
         {
             List<byte> buf = new List<byte>();
@@ -345,8 +379,8 @@ namespace DistributeSystem
 
         public override T Get<T>(string name)
         {
-            if (DataList == null) throw new Exception("no data");
-            if (!DataList.ContainsKey(name)) throw new Exception("no key");
+            if (DataList == null) return default(T);
+            if (!DataList.ContainsKey(name)) return default(T);
             
             return (T)DataList[name];
         }

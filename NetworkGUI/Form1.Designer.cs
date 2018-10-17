@@ -52,10 +52,10 @@
             this.label4 = new System.Windows.Forms.Label();
             this.selectedIP_Text = new System.Windows.Forms.TextBox();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.checkBox2 = new System.Windows.Forms.CheckBox();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
             this.button5 = new System.Windows.Forms.Button();
             this.timer2 = new System.Windows.Forms.Timer(this.components);
-            this.checkBox2 = new System.Windows.Forms.CheckBox();
             this.msgListView = new System.Windows.Forms.ListBox();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -187,6 +187,7 @@
             // 
             // Command_text
             // 
+            this.Command_text.BackColor = System.Drawing.Color.LightGreen;
             this.Command_text.Location = new System.Drawing.Point(76, 21);
             this.Command_text.Name = "Command_text";
             this.Command_text.Size = new System.Drawing.Size(100, 21);
@@ -200,6 +201,7 @@
             this.button4.TabIndex = 7;
             this.button4.Text = "Send To Selected IP";
             this.button4.UseVisualStyleBackColor = true;
+            this.button4.Click += new System.EventHandler(this.SendToSpecialIP);
             // 
             // button3
             // 
@@ -288,6 +290,19 @@
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Command";
             // 
+            // checkBox2
+            // 
+            this.checkBox2.AutoSize = true;
+            this.checkBox2.Checked = true;
+            this.checkBox2.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBox2.Location = new System.Drawing.Point(11, 151);
+            this.checkBox2.Name = "checkBox2";
+            this.checkBox2.Size = new System.Drawing.Size(66, 16);
+            this.checkBox2.TabIndex = 13;
+            this.checkBox2.Text = "Message";
+            this.checkBox2.UseVisualStyleBackColor = true;
+            this.checkBox2.CheckedChanged += new System.EventHandler(this.checkBox2_CheckedChanged);
+            // 
             // groupBox4
             // 
             this.groupBox4.Controls.Add(this.button5);
@@ -304,26 +319,13 @@
             this.button5.Name = "button5";
             this.button5.Size = new System.Drawing.Size(121, 23);
             this.button5.TabIndex = 0;
-            this.button5.Text = "test";
+            this.button5.Text = "PackageTest";
             this.button5.UseVisualStyleBackColor = true;
             this.button5.Click += new System.EventHandler(this.button5_Click);
             // 
             // timer2
             // 
             this.timer2.Tick += new System.EventHandler(this.timer2_Tick);
-            // 
-            // checkBox2
-            // 
-            this.checkBox2.AutoSize = true;
-            this.checkBox2.Checked = true;
-            this.checkBox2.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBox2.Location = new System.Drawing.Point(11, 151);
-            this.checkBox2.Name = "checkBox2";
-            this.checkBox2.Size = new System.Drawing.Size(66, 16);
-            this.checkBox2.TabIndex = 13;
-            this.checkBox2.Text = "Message";
-            this.checkBox2.UseVisualStyleBackColor = true;
-            this.checkBox2.CheckedChanged += new System.EventHandler(this.checkBox2_CheckedChanged);
             // 
             // msgListView
             // 

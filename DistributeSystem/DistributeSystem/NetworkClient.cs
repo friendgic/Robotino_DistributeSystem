@@ -144,7 +144,7 @@ namespace DistributeSystem
                 return new List<string>();
             }
 
-            AddMsg("Send NeedConnectedIPs ");
+           // AddMsg("Send NeedConnectedIPs ");
             packageNeedToSend.Add("CMD", "NeedConnectedIPs");
          
             SetNextTask(MyTask.ClientSend);
@@ -203,25 +203,21 @@ namespace DistributeSystem
         }
         public override void ReceiveFinsh(StateObject state)
         {
-            base.ReceiveFinsh(state);
-            var content = state.sb.ToString();
-            NetworkPackage np = new NetworkPackage();
-            np.DeserializeJson(content);
+            base.ReceiveFinsh(state); 
+            NetworkPackageCompress np = new NetworkPackageCompress();
+            np.DeserializeBin(state.data.ToArray());
             var dat = np.Get<List<string>>("ConnectedIPs");
             if (dat != null)
             {
                 connectedIP = dat;
                 SetEvent(DSEvent.ClientSendAndReceive);
-                AddMsg("Receive ConnectedIPs list");
+                AddMsg("--> ConnectedIPs list");
             }
             var cmd = np.Get<string>("CMD");
             if (cmd != null)
             {
-                AddMsg("Receive CMD:" + cmd);
-                switch (cmd)
-                {
-                    
-                }
+                AddMsg("--> CMD:" + cmd);
+                
             }
         }
 
@@ -231,9 +227,29 @@ namespace DistributeSystem
             {
                 return false;
             }
-            AddMsg("Start to send CMD to ALL, cmd:" + command);
+            //AddMsg("Start to send CMD to ALL, cmd:" + command);
             packageNeedToSend.Add("CMD", "SendCMDtoALL");
             packageNeedToSend.Add("DAT", command);
+
+            SetNextTask(MyTask.ClientSend);
+
+            if (CheckEvent(waitTime, DSEvent.ClientSend, DSEvent.Error))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public bool SendCommandToIP(string ip, string command,float waitTime = 1000)
+        {
+            if (!CheckConnection())
+            {
+                return false;
+            }
+           // AddMsg("Start to send CMD to IP, cmd:" + command);
+            packageNeedToSend.Add("CMD", "SendCMDtoIP");
+            packageNeedToSend.Add("DAT", command);
+            packageNeedToSend.Add("IP", ip);
 
             SetNextTask(MyTask.ClientSend);
 
