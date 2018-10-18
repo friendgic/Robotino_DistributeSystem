@@ -1,0 +1,6 @@
+D:\Robot\UPload\RobotinoController\RobotinoController\bin\Debug\RobotinoController.dll
+D:\Robot\UPload\RobotinoController\RobotinoController\bin\Debug\RobotinoController.pdb
+D:\Robot\UPload\RobotinoController\RobotinoController\obj\Debug\RobotinoController.csprojAssemblyReference.cache
+D:\Robot\UPload\RobotinoController\RobotinoController\obj\Debug\RobotinoController.csproj.CoreCompileInputs.cache
+D:\Robot\UPload\RobotinoController\RobotinoController\obj\Debug\RobotinoController.dll
+D:\Robot\UPload\RobotinoController\RobotinoController\obj\Debug\RobotinoController.pdb

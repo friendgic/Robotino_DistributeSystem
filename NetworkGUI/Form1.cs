@@ -4,28 +4,30 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Timers;
 using System.Windows.Forms;
 using DistributeSystem;
-
+using RobotinoController;
 namespace NetworkGUI
 {
-    public partial class Form1 : Form
+    public partial class MainForm : Form
     {
         private NetworkServer server;
         private NetworkClient client;
         private bool init = false;
+        private Robotino robot;
 
         private int historyLength=17;
 
-        public Form1()
+        public MainForm()
         {
             InitializeComponent();
             timer2.Start();
             msgListView.BeginUpdate();
             msgListView.Items.Clear();
-
+            robot = new Robotino();
             for (int i = historyLength; i >= 0; i--)
             { 
                 msgListView.Items.Add("");
@@ -324,6 +326,52 @@ namespace NetworkGUI
             {
                 server.sendcommandToIP(ip, cmd);
             }
+        }
+
+         
+        private void button6_Click(object sender, EventArgs e)
+        {
+            string rip = RobotIP.Text;
+   
+            try
+            {
+                robot.Connect(rip);
+            }
+            catch (Exception exce)
+            {
+                MessageBox.Show(exce.ToString());
+                return;
+            }
+            MessageBox.Show("Connect Successful!");
+
+        }
+
+        private void button7_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                robot.DisConnect();
+            }
+            catch (Exception exce)
+            {
+                MessageBox.Show(exce.ToString());
+                return;
+            }
+            MessageBox.Show("Disconnect!");
+        }
+         
+
+        private void button15_Click(object sender, EventArgs e)
+        {
+            ControllerPannel cp = new ControllerPannel();
+            cp.robot = robot;
+            cp.Show();
+        }
+
+        private void button14_Click(object sender, EventArgs e)
+        {
+            Demo1 demo = new Demo1();
+            demo.robot = robot;
         }
     }
 }

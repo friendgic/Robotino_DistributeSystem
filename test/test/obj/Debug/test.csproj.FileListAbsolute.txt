@@ -26,3 +26,10 @@ D:\Robot\project\test\test\obj\Debug\test.csprojAssemblyReference.cache
 D:\Robot\project\test\test\obj\Debug\test.csproj.CoreCompileInputs.cache
 D:\Robot\project\test\test\obj\Debug\test.exe
 D:\Robot\project\test\test\obj\Debug\test.pdb
+D:\Robot\UPload\test\test\bin\Debug\test.exe.config
+D:\Robot\UPload\test\test\bin\Debug\test.exe
+D:\Robot\UPload\test\test\bin\Debug\test.pdb
+D:\Robot\UPload\test\test\obj\Debug\test.csprojAssemblyReference.cache
+D:\Robot\UPload\test\test\obj\Debug\test.csproj.CoreCompileInputs.cache
+D:\Robot\UPload\test\test\obj\Debug\test.exe
+D:\Robot\UPload\test\test\obj\Debug\test.pdb

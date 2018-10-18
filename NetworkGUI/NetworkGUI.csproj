@@ -31,9 +31,18 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <PlatformTarget>x86</PlatformTarget>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <PlatformTarget>x86</PlatformTarget>
+    <OutputPath>bin\x86\Release\</OutputPath>
+  </PropertyGroup>
   <ItemGroup>
-    <Reference Include="DistributeSystem">
-      <HintPath>..\DistributeSystem\DistributeSystem\bin\Debug\DistributeSystem.dll</HintPath>
+    <Reference Include="DistributeSystem, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\DistributeSystem\DistributeSystem\bin\x86\Debug\DistributeSystem.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -46,6 +55,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ControllerPannel.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ControllerPannel.Designer.cs">
+      <DependentUpon>ControllerPannel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Demo1.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Demo1.Designer.cs">
+      <DependentUpon>Demo1.cs</DependentUpon>
+    </Compile>
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -54,6 +75,12 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="ControllerPannel.resx">
+      <DependentUpon>ControllerPannel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Demo1.resx">
+      <DependentUpon>Demo1.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>

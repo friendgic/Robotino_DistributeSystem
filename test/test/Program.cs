@@ -50,9 +50,9 @@ namespace ConsoleApplication1
             int comId = Com_construct();
             Console.WriteLine("comId={0}", comId);
             
-            //bool ok = Com_setAddress(comId, "127.0.0.1");
+            bool ok = Com_setAddress(comId, "127.0.0.1");
             //bool ok = Com_setAddress(comId, "169.254.7.210");
-            bool ok = Com_setAddress(comId, "172.26.1.103");
+           /// bool ok = Com_setAddress(comId, "172.26.1.103");
             Console.WriteLine("Com_setAddress returned {0}", ok);
 
             ok = Com_connect(comId);
