@@ -1,8 +1,0 @@
-D:\Robot\UPload\DistributeSystem\DistributeSystem\obj\Debug\DistributeSystem.csprojAssemblyReference.cache
-D:\Robot\UPload\DistributeSystem\DistributeSystem\obj\Debug\DistributeSystem.csproj.CoreCompileInputs.cache
-D:\Robot\UPload\DistributeSystem\DistributeSystem\bin\Debug\DistributeSystem.dll
-D:\Robot\UPload\DistributeSystem\DistributeSystem\bin\Debug\DistributeSystem.pdb
-D:\Robot\UPload\DistributeSystem\DistributeSystem\bin\Debug\Newtonsoft.Json.dll
-D:\Robot\UPload\DistributeSystem\DistributeSystem\obj\Debug\DistributeSystem.csproj.CopyComplete
-D:\Robot\UPload\DistributeSystem\DistributeSystem\obj\Debug\DistributeSystem.dll
-D:\Robot\UPload\DistributeSystem\DistributeSystem\obj\Debug\DistributeSystem.pdb
