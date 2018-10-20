@@ -4,32 +4,34 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 
-namespace DistributeSystem 
+namespace DistributeSystem
 {
-    public class NetworkBase
+    public class ThreadBase
     {
         #region Init
 
         private Thread myThread;
         private AutoResetEvent autoEvent = new AutoResetEvent(false);
         public bool threadEnable = false;
-        public bool threadRunning=false;
-        public Queue<MyTask> taskQueue;
-        public Queue<string> msgQueue;
+        public bool threadRunning;
+        public Queue<MyTask> taskQueue=new Queue<MyTask>();
         public Queue<DSEvent> EventQueue = new Queue<DSEvent>();
-        public int msgQueueLength = 15;
+        public Queue<string> MsgQueue = new Queue<string>();
+        private object locker = new object();
+        public int MsgQueueLength = 15;
         #endregion
+
 
         #region Thread
 
-        ~NetworkBase()
+        ~ThreadBase()
         {
             Release();
         }
-        public NetworkBase()
+        public ThreadBase()
         {
         }
-         
+
         protected void ThreadInit()
         {
             taskQueue = new Queue<MyTask>();
@@ -67,6 +69,7 @@ namespace DistributeSystem
                 if (!threadEnable) break;
             }
             threadRunning = false;
+            SetEvent(DSEvent.Released);
         }
         protected virtual void RunTask(MyTask task)
         {
@@ -84,10 +87,11 @@ namespace DistributeSystem
 
 
         #region Utility
+
         public void AddMsg(string msg)
         {
-            if (msgQueue.Count > msgQueueLength) msgQueue.Dequeue();
-            msgQueue.Enqueue(msg);
+            if (MsgQueue.Count > MsgQueueLength) MsgQueue.Dequeue();
+            MsgQueue.Enqueue(msg);
 
         }
         public DSEvent GetEvent()
@@ -98,7 +102,7 @@ namespace DistributeSystem
             }
             return DSEvent.None;
         }
-       
+
 
         public void SetEvent(DSEvent eve, string msg = " ")
         {
@@ -133,6 +137,6 @@ namespace DistributeSystem
 
             return false;
         }
-        #endregion
+        #endregion 
     }
 }

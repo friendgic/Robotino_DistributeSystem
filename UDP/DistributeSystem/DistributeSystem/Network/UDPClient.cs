@@ -6,9 +6,9 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 
-namespace DistributeSystem.Network
+namespace DistributeSystem
 {
-    public class UDPClient:NetworkBase
+    public class UDPClient_2:NetworkBase
     {
         public int myPort;
         public Queue<string> msgQueue;
@@ -18,36 +18,65 @@ namespace DistributeSystem.Network
         private string myIP;
         private Socket mySocket;
         #region Init
-        public UDPClient(int port)
+        public UDPClient_2(int port=11000)
         {
             msgQueue = new Queue<string>();
             myPort = port;
             myIP = GetLocalIP();
-            AddMsg(myIP);
+            //SetEvent(DSEvent.Init, "Client");
             base.ThreadInit();
         }
-        public override void RunTask(MyTask task)
+         ~UDPClient_2()
+        {
+            SetNextTask(MyTask.Close);
+        }
+        protected override void RunTask(MyTask task)
         {
             base.RunTask(task);
             switch (task)
             {
-                case MyTask.StartClient:
-                    AddMsg("Start Client");
+                case MyTask.StartClient: 
                     StartClient();
+                    break;
+                case MyTask.Close:
+                    CloseClient();
                     break;
             }
         }
+
         #endregion
 
         #region Network
         private void StartClient()
         {
-            var iep = new IPEndPoint(IPAddress.Any, myPort);
-            mySocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-            StateObject state = new StateObject();
+            try
+                {
+                if (mySocket != null)
+                {
+                    mySocket.Close();
+                    mySocket = null;
+                }
 
-            mySocket.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
-                 new AsyncCallback(ReadCallback), state);
+                var iep = new IPEndPoint(IPAddress.Any, myPort);
+                mySocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+                    mySocket.Bind(iep);
+                    StateObject state = new StateObject();
+
+                mySocket.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
+                     new AsyncCallback(ReadCallback), state);
+
+                SetEvent(DSEvent.Init,MyFullIP);
+            }catch(Exception e)
+            {
+                SetEvent(DSEvent.Error,e.ToString());
+            }
+        }
+
+        private void CloseClient()
+        {
+            Release();
+            if(mySocket!=null)
+            mySocket.Close();
         }
         private void ReadCallback(IAsyncResult ar)
         {
@@ -55,6 +84,7 @@ namespace DistributeSystem.Network
 
             StateObject state = (StateObject)ar.AsyncState;
             Socket handler = state.workSocket;
+            if (handler == null) return;
             try
             {
                 // Read data from the client socket.   
@@ -85,9 +115,9 @@ namespace DistributeSystem.Network
                 handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
                                                            new AsyncCallback(ReadCallback), state);
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                AddMsg(e.ToString());
+             
                 SetEvent(DSEvent.Error);
                 try
                 {
@@ -130,57 +160,53 @@ namespace DistributeSystem.Network
         {
             SetNextTask(MyTask.StartClient);
         }
-        public void Send(string msg, string remoteIP, string remotePort)
+        public void Close()
         {
+            SetNextTask(MyTask.Close);
+        }
+        public void Send(byte[] data, string remoteIP, int port)
+        {
+            try
+            {
+
             var ip = IPAddress.Parse(remoteIP);
+            var iep = new IPEndPoint(ip,port);
 
-        }
-            #endregion
-
-            #region Utility
-            public void AddMsg(string msg)
-        {
-            if (msgQueue.Count > msgQueueLength) msgQueue.Dequeue();
-            msgQueue.Enqueue(msg);
-            Console.WriteLine(msg);
-        }
-        public DSEvent GetEvent()
-        {
-            if (EventQueue.Count > 0)
-            {
-                return EventQueue.Dequeue();
+            mySocket.BeginSend(data, 0, data.Length, 0,
+              new AsyncCallback(SendCallback), mySocket);
+            }catch(Exception e)
+            { 
+                SetEvent(DSEvent.Error);
             }
-            return DSEvent.None;
         }
-        public void SetEvent(DSEvent str)
-        {
-            if (EventQueue == null)
-                EventQueue = new Queue<DSEvent>();
-            EventQueue.Enqueue(str);
-        }
-        public bool CheckEvent(double time, DSEvent successful, DSEvent failure)
-        {
-            DateTime t = DateTime.Now;
-            while ((DateTime.Now - t).TotalMilliseconds < time)
-            {
-                var eve = GetEvent();
-                if (eve != DSEvent.None)
-                {
-                    if (eve == successful)
-                    {
-                        return true;
-                    }
-                    if (eve == failure)
-                    {
-                        return false;
-                    }
-                    SetEvent(eve);//turn back event;
-                }
-                Thread.Sleep(1);
-            }
 
-            return false;
+        private void SendCallback(IAsyncResult ar)
+        {
+            try
+            {
+                // Retrieve the socket from the state object.  
+                Socket handler = (Socket)ar.AsyncState;
+
+                // Complete sending the data to the remote device.  
+                int bytesSent = handler.EndSend(ar);
+                Console.WriteLine("Sent {0} bytes.", bytesSent);
+
+            }
+            catch (Exception)
+            {
+                SetEvent(DSEvent.Error);
+            }
+        }
+
+        public string MyFullIP
+        {
+            get
+            {
+                return myIP + ":" + myPort;
+
+            }
         }
         #endregion
+
     }
 }

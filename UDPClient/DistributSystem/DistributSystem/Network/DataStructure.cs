@@ -7,16 +7,16 @@ using System.Text;
 namespace DistributeSystem
 {
     public enum MyTask
-    {
-        None,
-        StartClient,
-        Close
+    { None,
+        Close,
+        StartClient
     }
     public enum DSEvent
-    {
-        None,
+    { None,
         Error,
-        Init
+        StartClient,
+        Receive,
+        Released
     }
     public class StateObject
     {
@@ -34,5 +34,9 @@ namespace DistributeSystem
             buffer = new byte[BufferSize];
             data = new List<byte>();
         }
+    }
+    public class DataStructure
+    {
+
     }
 }
