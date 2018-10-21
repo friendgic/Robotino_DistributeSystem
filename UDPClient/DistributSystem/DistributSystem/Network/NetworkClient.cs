@@ -97,8 +97,8 @@ namespace DistributeSystem
                 byte[] receiveBytes = client.EndReceive(ar, ref e);
                 client.BeginReceive(new AsyncCallback(ReceiveCallBack), client);
                 //call receive data
-                Receiving(receiveBytes);
-                SetEvent(DSEvent.Receive, receiveBytes.Length + "b");
+                Receiving(receiveBytes,e);
+                //SetEvent(DSEvent.Receive, receiveBytes.Length + "b");
             }
             catch (Exception e)
             {
@@ -106,7 +106,7 @@ namespace DistributeSystem
             }
         }
 
-        protected virtual void Receiving(byte[] data)
+        protected virtual void Receiving(byte[] data, IPEndPoint e)
         {
 
         }

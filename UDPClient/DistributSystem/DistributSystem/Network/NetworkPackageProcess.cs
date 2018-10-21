@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
  
 namespace DistributeSystem
@@ -48,11 +49,13 @@ namespace DistributeSystem
             Send(dat, sendPackage.targetIP, sendPackage.targetPort);
             sendPackage.Reset();
         }
-        protected override void Receiving(byte[] data)
+        protected override void Receiving(byte[] data, IPEndPoint e)
         {
-            base.Receiving(data);
+            base.Receiving(data,e);
             NetworkPackageCompress newPack = new NetworkPackageCompress();
             newPack.DeserializeBin(data);
+            newPack.targetIP = e.Address.ToString();
+            newPack.targetPort = e.Port;
             CommingPackage(newPack);
         }
         protected virtual void CommingPackage(NetworkPackageCompress pack)

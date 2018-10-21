@@ -10,7 +10,7 @@ namespace DistributeSystem
     {
         #region Init
         public List<RobotAgent> list = new List<RobotAgent>();
-
+        public List<string> targetList = new List<string>();
         private byte pulseCount = 0;
 
         #endregion
@@ -20,6 +20,7 @@ namespace DistributeSystem
         {
             var ok=  base.Start(port);
             if (!ok) return false;
+
             //start timmer
             aTimer = new System.Timers.Timer(1000); 
             aTimer.Elapsed += OnTimedEvent;
@@ -28,7 +29,7 @@ namespace DistributeSystem
             //set list
             list = new List<RobotAgent>();
             list.Add(this);
-
+            targetList = new List<string>();
             //set other
             pulseCount = 0;
             return true;
@@ -74,7 +75,7 @@ namespace DistributeSystem
             byte pulse = 0;
             if (pack.GetFromBin<byte>("#", out pulse))
             {
-                SetEvent(DSEvent.Receive, "Pulse "+pulse.ToString());
+                SetEvent(DSEvent.Receive, "Pulse "+pulse.ToString() +" < "+ pack.targetIP+":"+pack.targetPort.ToString());
             }
         }
         #endregion
