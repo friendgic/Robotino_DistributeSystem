@@ -9,10 +9,11 @@ namespace DistributeSystem
     public class RobotAgent:NetworkPackageProcess
     {
         #region Init
-        public List<RobotAgent> list = new List<RobotAgent>();
+ 
         public List<string> targetList = new List<string>();
-        private byte pulseCount = 0;
 
+        private byte pulseCount = 0;
+        private BroadCastAgent bcAgent=new BroadCastAgent();
         #endregion
         #region Interface
         Timer aTimer;
@@ -27,11 +28,13 @@ namespace DistributeSystem
             aTimer.AutoReset = true;
             aTimer.Enabled = true;
             //set list
-            list = new List<RobotAgent>();
-            list.Add(this);
+            
             targetList = new List<string>();
             //set other
             pulseCount = 0;
+
+            //broadcastAgent
+            bcAgent.Start(12000);
             return true;
         }
 
@@ -39,6 +42,11 @@ namespace DistributeSystem
         {
             if(aTimer!=null)
             aTimer.Close();
+
+            if (bcAgent != null)
+            {
+                bcAgent.Close();
+            }
             base.Close();
         }
         private void OnTimedEvent(Object source, ElapsedEventArgs e)
@@ -65,18 +73,18 @@ namespace DistributeSystem
 
         private void SendOutPulse()
         {
-            sendPackage.Add("#", pulseCount++);
-            SendPackage("255.255.255.255", localPort);
+            sendingPack.Add("#", pulseCount++);
+            SendPackage("255.255.255.255", bcAgent.localPort);
         }
 
         protected override void CommingPackage(NetworkPackageCompress pack)
         {
             base.CommingPackage(pack);
             byte pulse = 0;
-            if (pack.GetFromBin<byte>("#", out pulse))
-            {
-                SetEvent(DSEvent.Receive, "Pulse "+pulse.ToString() +" < "+ pack.targetIP+":"+pack.targetPort.ToString());
-            }
+            //if (pack.GetFromBin<byte>("#", out pulse))
+            //{
+            //    SetEvent(DSEvent.Receive, "Pulse "+pulse.ToString() +" < "+ pack.targetIP+":"+pack.targetPort.ToString());
+            //}
         }
         #endregion
     }

@@ -9,7 +9,7 @@ namespace DistributeSystem
     public class NetworkPackageProcess:NetworkClient
     {
         #region Init
-        protected NetworkPackageCompress sendPackage=new NetworkPackageCompress();
+        protected NetworkPackageCompress sendingPack=new NetworkPackageCompress();
         #endregion
         #region Interface
 
@@ -21,9 +21,9 @@ namespace DistributeSystem
         }
         public void SendPackage(string ip,int port,bool compress=false)
         {
-            sendPackage.targetIP = ip;
-            sendPackage.targetPort = port;
-            sendPackage.needToCompress = compress;
+            sendingPack.targetIP = ip;
+            sendingPack.targetPort = port;
+            sendingPack.needToCompress = compress;
             SetNextTask(MyTask.Pack_Send);
         }
 
@@ -45,9 +45,9 @@ namespace DistributeSystem
         #region Private/Protect Method
         private void SendPackageExe()
         {
-            var dat= sendPackage.SerializeBin();
-            Send(dat, sendPackage.targetIP, sendPackage.targetPort);
-            sendPackage.Reset();
+            var dat= sendingPack.SerializeBin();
+            Send(dat, sendingPack.targetIP, sendingPack.targetPort);
+            sendingPack.Reset();
         }
         protected override void Receiving(byte[] data, IPEndPoint e)
         {
