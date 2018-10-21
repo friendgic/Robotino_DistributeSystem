@@ -10,29 +10,12 @@ namespace DistributeSystem
 { 
     public class NetworkPackage
     {
-        //[JsonProperty]
-        public Dictionary<string, object> DataList;
-        private Socket targetSocket;
-        private List<Socket> targetSockets;
-
+        public Dictionary<string, object> DataList=new Dictionary<string, object>();
         [JsonIgnore]
-        public Socket _target { get { return targetSocket; } }
-
+        public string targetIP;
         [JsonIgnore]
-        public List<Socket> _targets { get { return targetSockets; } }
+        public int targetPort;
 
-        public void SetTarget(Socket target)
-        {
-            targetSocket = target;
-        }
-        public void SetTargets(List<Socket> targets)
-        {
-            targetSockets = targets;
-        }
-        public NetworkPackage()
-        {
-            DataList = new Dictionary<string, object>();
-        }
         public bool isEmpty()
         {
             return DataList.Count == 0;
@@ -40,8 +23,6 @@ namespace DistributeSystem
         public void Reset()
         {
             DataList = new Dictionary<string, object>();
-            SetTarget(null);
-            SetTargets(null);
         }
  
         public void Add(string name, Object obj)
@@ -93,7 +74,7 @@ namespace DistributeSystem
         }
 
         
-        public Object Get(string name)
+        public Object GetFromJson(string name)
         {
             if (DataList == null) return null;
             if (!DataList.ContainsKey(name)) return null;
@@ -101,9 +82,9 @@ namespace DistributeSystem
             return DataList[name];
         }
 
-        public virtual T Get<T>(string name)
+        public virtual T GetFromJson<T>(string name)
         {
-            object obj = Get(name);
+            object obj = GetFromJson(name);
             if (obj != null)
             {
                 string str = JsonConvert.SerializeObject(obj);

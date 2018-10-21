@@ -9,7 +9,9 @@ namespace DistributeSystem
     public enum MyTask
     { None,
         Close,
-        StartClient
+        StartClient,
+        Agent_Pulse,
+        Pack_Send
     }
     public enum DSEvent
     { None,

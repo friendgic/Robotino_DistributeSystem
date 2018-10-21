@@ -12,38 +12,49 @@ namespace DSGUI
 {
     public partial class Form1 : Form
     {
-        public NetworkClient client=new NetworkClient();
+        public RobotAgent robot=new RobotAgent();
         public Form1()
         {
             InitializeComponent();
+            timer1.Start();
             
         }
-
-        private void button1_Click(object sender, EventArgs e)
-        { 
-            client.Start(11000);
-        }
-
-        private void button2_Click(object sender, EventArgs e)
-        { 
-            client.Start(11001);
-
-        }
-
+         
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
-            client.Close();
+            robot.Close();
+        }
+         
+        private void StartButton(object sender, EventArgs e)
+        {
+            if (!robot.Active)
+            {
+                int port =int .Parse( portInput.Text);
+                robot.Start(port);
+            }
+            else
+            {
+                robot.Close();
+            }
         }
 
-        private void button3_Click(object sender, EventArgs e)
+        private void timer1_Tick(object sender, EventArgs e)
         {
-            byte[] test = new byte[10] { 1, 2, 3, 4, 5, 6, 7, 8, 9 ,0};
-            client.Send(test, "127.0.0.1", 11000);
-        }
-
-        private void button4_Click(object sender, EventArgs e)
-        {
-            client.Start(11002);
+            string test = robot.ReadADebugMsg();
+            if (test != string.Empty) 
+            debugText.Text = test + debugText.Text;
+            if (debugText.Text.Length > 1000) debugText.Text = "";
+            if (robot != null)
+            {
+                if (robot.Active)
+                {
+                    button1.Text = "Stop";
+                }
+                else
+                {
+                    button1.Text = "Start";
+                }
+            }
         }
     }
 }

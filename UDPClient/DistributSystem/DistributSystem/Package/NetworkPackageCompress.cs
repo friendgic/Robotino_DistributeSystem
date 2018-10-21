@@ -9,16 +9,17 @@ namespace DistributeSystem
 {
     public class NetworkPackageCompress : NetworkPackageBin
     {
+        public bool needToCompress=false;
         public new byte[] SerializeJson()
         {
             var ori= base.SerializeJson();
             var zip=DataCompress. Zip(ori);
             return zip;
         }
-        public byte[] SerializeBin(bool compress)
+        public new byte[] SerializeBin()
         {
             var ori=base.SerializeBin();
-            if (compress)
+            if (needToCompress)
             {
             var zip = DataCompress.ZipBin(ori);
                 return zip;
@@ -35,9 +36,9 @@ namespace DistributeSystem
             var unZip = DataCompress.Unzip(zipData);
             base.DeserializeJson(unZip);
         }
-        public void DeserializeBin(byte[] oriData,bool depress)
+        public new void DeserializeBin(byte[] oriData )
         {
-            if (depress)
+            if (needToCompress)
             {
             var unZip = DataCompress.UnzipBin(oriData);
             base.DeserializeBin(unZip);

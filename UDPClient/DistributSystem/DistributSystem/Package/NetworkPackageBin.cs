@@ -22,7 +22,7 @@ namespace DistributeSystem
     }
     public class NetworkPackageBin:NetworkPackage
     {
-        static public int version = 1;
+        static public int version = 2;
         public virtual byte[] SerializeBin()
         {
             List<byte> buffer = new List<byte>();
@@ -377,12 +377,13 @@ namespace DistributeSystem
             return raw[index++];
         }
 
-        public override T Get<T>(string name)
+        public bool GetFromBin<T>(string name,out T exist)
         {
-            if (DataList == null) return default(T);
-            if (!DataList.ContainsKey(name)) return default(T);
-            
-            return (T)DataList[name];
+            exist = default(T);
+            if (DataList == null) return false;
+            if (!DataList.ContainsKey(name)) return false;
+            exist = (T)DataList[name];
+            return true;
         }
     }
 }

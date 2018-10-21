@@ -62,6 +62,8 @@
   <ItemGroup>
     <Compile Include="Network\DataStructure.cs" />
     <Compile Include="Network\NetworkClient.cs" />
+    <Compile Include="Network\NetworkPackageProcess.cs" />
+    <Compile Include="Network\RobotAgent.cs" />
     <Compile Include="Network\ThreadBase.cs" />
     <Compile Include="Package\DataCompress.cs" />
     <Compile Include="Package\NetworkPackage.cs" />

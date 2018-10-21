@@ -13,7 +13,7 @@ namespace DistributeSystem
         private Thread myThread;
         private AutoResetEvent autoEvent = new AutoResetEvent(false);
         public bool threadEnable = false;
-        public bool threadRunning;
+        public bool threadRunning=false;
         public Queue<MyTask> taskQueue=new Queue<MyTask>();
         public Queue<DSEvent> EventQueue = new Queue<DSEvent>();
         public Queue<string> MsgQueue = new Queue<string>();
@@ -35,6 +35,8 @@ namespace DistributeSystem
         protected void ThreadInit()
         {
             taskQueue = new Queue<MyTask>();
+            EventQueue = new Queue<DSEvent>();
+            MsgQueue = new Queue<string>();
             if (!threadEnable)
             {
                 threadEnable = true;
@@ -69,7 +71,7 @@ namespace DistributeSystem
                 if (!threadEnable) break;
             }
             threadRunning = false;
-            SetEvent(DSEvent.Released);
+            SetEvent(DSEvent.Released,"Program stop");
         }
         protected virtual void RunTask(MyTask task)
         {
@@ -88,11 +90,17 @@ namespace DistributeSystem
 
         #region Utility
 
-        public void AddMsg(string msg)
+        private void AddMsg(string msg)
         {
             if (MsgQueue.Count > MsgQueueLength) MsgQueue.Dequeue();
             MsgQueue.Enqueue(msg);
-
+        }
+        public string ReadADebugMsg()
+        {
+            if (MsgQueue.Count > 0)
+                return MsgQueue.Dequeue();
+            else
+                return string .Empty;
         }
         public DSEvent GetEvent()
         {
@@ -104,14 +112,19 @@ namespace DistributeSystem
         }
 
 
-        public void SetEvent(DSEvent eve, string msg = " ")
+        public void SetEvent(DSEvent eve, string msg = " " , bool quit=false)
         {
             if (EventQueue == null)
                 EventQueue = new Queue<DSEvent>();
             EventQueue.Enqueue(eve);
-            string str = "[" + eve.ToString() + "] " + msg;
+            string str = "[" + eve.ToString() + "] " + msg+"\n";
+            if(msg!=" ")
+            {
+
             AddMsg(str);
             Console.WriteLine(str);
+            }
+            if(quit)
             if (eve == DSEvent.Error) throw new Exception();
         }
         public bool CheckEvent(double time, DSEvent successful, DSEvent failure)
@@ -134,7 +147,7 @@ namespace DistributeSystem
                 }
                 Thread.Sleep(1);
             }
-
+            SetEvent(DSEvent.Error, "Time out");
             return false;
         }
         #endregion 

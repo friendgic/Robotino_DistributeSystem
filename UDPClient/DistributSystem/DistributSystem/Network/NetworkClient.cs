@@ -11,17 +11,23 @@ namespace DistributeSystem
     {
         #region Init
         public string localIP;
-        protected int localPort=11000;
+        public int localPort=11000;
         protected UdpClient client;
 
         public NetworkClient()
         {
-            localIP = GetLocalIP();
-            base.ThreadInit();
+            
         }
         ~NetworkClient()
         {
             SetNextTask(MyTask.Close);
+        }
+        public bool Active
+        {
+            get
+            {
+                return threadRunning;
+            }
         }
         protected override void RunTask(MyTask task)
         {
@@ -43,6 +49,7 @@ namespace DistributeSystem
         #region Network
         private void CloseClient()
         {
+            
             Release();
             if (client != null)
                 client.Close();
@@ -57,7 +64,7 @@ namespace DistributeSystem
                 {
                     client.Close();
                 }
-
+                localIP = GetLocalIP();
                 client = new UdpClient(localPort);
 
                 //////////////////////////////////////////// avoid lose connection//////////////////////////////////////////////////////////
@@ -82,20 +89,27 @@ namespace DistributeSystem
             try
             {
                 UdpClient u = ar.AsyncState as UdpClient;
-                if (u == null) return;
-                if (u.Client==null) return;
+            if (u == null) return;
+            if (u.Client == null) return;
+                if (client == null) return;
+                if (client.Client==null) return;
                 IPEndPoint e = new IPEndPoint(IPAddress.Any, localPort);
                 byte[] receiveBytes = client.EndReceive(ar, ref e);
-
                 client.BeginReceive(new AsyncCallback(ReceiveCallBack), client);
-
+                //call receive data
+                Receiving(receiveBytes);
                 SetEvent(DSEvent.Receive, receiveBytes.Length + "b");
-            } catch(Exception e)
+            }
+            catch (Exception e)
             {
                 SetEvent(DSEvent.Error, "Receive Data Error");
             }
         }
 
+        protected virtual void Receiving(byte[] data)
+        {
+
+        }
 
 
         private string GetLocalIP()
@@ -115,17 +129,19 @@ namespace DistributeSystem
         #endregion
 
         #region Interface
-        public void Start(int port = 11000)
+        public virtual bool Start(int port = 11000)
         {
             this.localPort = port;
+            base.ThreadInit();
             SetNextTask(MyTask.StartClient);
+            return CheckEvent(1000, DSEvent.StartClient, DSEvent.Error);
         }
-        public void Close()
+        public virtual void Close()
         {
             SetNextTask(MyTask.Close);
             CheckEvent(1000, DSEvent.Released, DSEvent.Error);
         }
-        public void Send(byte[] data,string ip,int port)
+        protected void Send(byte[] data,string ip,int port)
         {
             IPAddress ipAddress = IPAddress.Parse(ip);
             IPEndPoint ipEndPoint = new IPEndPoint(ipAddress, port);
