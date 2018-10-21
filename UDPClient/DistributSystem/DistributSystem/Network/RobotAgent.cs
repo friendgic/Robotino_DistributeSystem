@@ -49,9 +49,17 @@ namespace DistributeSystem
             }
             base.Close();
         }
-        private void OnTimedEvent(Object source, ElapsedEventArgs e)
+
+        public void GetConnectedAgentFromBC(out List<string>ips,out List<int>ports)
         {
-            SetNextTask(MyTask.Agent_Pulse);
+            ips = new List<string>();
+            ports = new List<int>();
+            for(int i = 0; i < bcAgent.list.Count; i++)
+            {
+                var item = bcAgent.list[i];
+                ips.Add( item.localIP);
+                ports.Add(item.localPort);
+            }
         }
         #endregion
 
@@ -70,6 +78,10 @@ namespace DistributeSystem
 
         #region Private / protect method
 
+        private void OnTimedEvent(Object source, ElapsedEventArgs e)
+        {
+            SetNextTask(MyTask.Agent_Pulse);
+        }
 
         private void SendOutPulse()
         {

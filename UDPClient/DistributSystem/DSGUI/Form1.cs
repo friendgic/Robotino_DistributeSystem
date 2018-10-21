@@ -13,11 +13,20 @@ namespace DSGUI
     public partial class Form1 : Form
     {
         public RobotAgent robot=new RobotAgent();
+
+        private List<string> ips = new List<string>();
+        private List<int> ports = new List<int>();
         public Form1()
         {
             InitializeComponent();
             timer1.Start();
-            
+            for(int i = 0; i < 20; i++)
+            {
+                listBox1.Items.Add("");
+
+            }
+
+
         }
          
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
@@ -49,6 +58,12 @@ namespace DSGUI
                 if (robot.Active)
                 {
                     button1.Text = "Stop";
+                    robot.GetConnectedAgentFromBC(out ips, out ports);
+                    for (int i = 0; i < ips.Count; i++)
+                    {
+                        var str = ips[i] +":"+ ports[i].ToString();
+                        listBox1.Items[i] = str;
+                    }
                 }
                 else
                 {
