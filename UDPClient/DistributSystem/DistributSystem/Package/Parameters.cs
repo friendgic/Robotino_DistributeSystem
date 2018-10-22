@@ -108,8 +108,7 @@ namespace DistributeSystem
                 List<float> dat2 = new List<float>();
                 if (pack.GetFromBin("c_DisSensor", out dat2))
                 {
-                    v_DisSensor = dat2;
-                    Console.WriteLine(v_DisSensor[0]);
+                    v_DisSensor = dat2; 
                 }
             }
         }
