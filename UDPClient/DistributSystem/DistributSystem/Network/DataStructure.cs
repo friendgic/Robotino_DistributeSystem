@@ -7,18 +7,22 @@ using System.Text;
 namespace DistributeSystem
 {
     public enum MyTask
-    { None,
+    {
+        None,
         Close,
         StartClient,
-        Agent_Pulse,
-        Pack_Send
+        Pack_Send,
+        RobotAgent_Para,
+        RobotAgent_Pulse
     }
     public enum DSEvent
-    { None,
+    {
+        None,
         Error,
         StartClient,
         Receive,
-        Released
+        Released,
+        Agent
     }
     public class StateObject
     {

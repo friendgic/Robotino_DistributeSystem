@@ -19,10 +19,12 @@ namespace DistributeSystem
             
             return ok;
         }
-        public void SendPackage(string ip,int port,bool compress=false)
+        public void AddSendTarget(string ip,int port)
         {
-            sendingPack.targetIP = ip;
-            sendingPack.targetPort = port;
+            sendingPack.AddTarget(ip, port);
+        }
+        public void SendPackage( bool compress=false)
+        { 
             sendingPack.needToCompress = compress;
             SetNextTask(MyTask.Pack_Send);
         }
@@ -45,18 +47,32 @@ namespace DistributeSystem
         #region Private/Protect Method
         private void SendPackageExe()
         {
-            var dat= sendingPack.SerializeBin();
-            Send(dat, sendingPack.targetIP, sendingPack.targetPort);
-            sendingPack.Reset();
+            try
+            {
+                var dat = sendingPack.SerializeBin();
+                Send(dat, sendingPack.targetIPs, sendingPack.targetPorts);
+                sendingPack.Reset();
+            }
+            catch (Exception)
+            {
+                SetEvent(DSEvent.Error, "Send Package error");
+            }
         }
         protected override void Receiving(byte[] data, IPEndPoint e)
         {
+            try
+            {
+
             base.Receiving(data,e);
             NetworkPackageCompress newPack = new NetworkPackageCompress();
             newPack.DeserializeBin(data);
-            newPack.targetIP = e.Address.ToString();
-            newPack.targetPort = e.Port;
+            newPack.AddTarget(e.Address.ToString(),e.Port);
             CommingPackage(newPack);
+            }
+            catch (Exception)
+            {
+                SetEvent(DSEvent.Error, "Receive Package error");
+            }
         }
         protected virtual void CommingPackage(NetworkPackageCompress pack)
         {

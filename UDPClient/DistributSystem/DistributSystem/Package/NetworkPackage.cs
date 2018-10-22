@@ -12,9 +12,24 @@ namespace DistributeSystem
     {
         public Dictionary<string, object> DataList=new Dictionary<string, object>();
         [JsonIgnore]
-        public string targetIP;
+        public List<string> targetIPs=new List<string>();
         [JsonIgnore]
-        public int targetPort;
+        public List<int> targetPorts=new List<int>();
+
+        public void AddTarget(string ip,int port)
+        {
+            for(int i = 0; i < targetIPs.Count; i++)
+            {
+                var item = targetIPs[i];
+                var item2 = targetPorts[i];
+                if(item==ip && item2 == port)
+                {
+                    return;
+                }
+            }
+            targetIPs.Add(ip);
+            targetPorts.Add(port);
+        }
 
         public bool isEmpty()
         {
@@ -23,6 +38,8 @@ namespace DistributeSystem
         public void Reset()
         {
             DataList = new Dictionary<string, object>();
+            targetIPs = new List<string>();
+            targetPorts = new List<int>();
         }
  
         public void Add(string name, Object obj)

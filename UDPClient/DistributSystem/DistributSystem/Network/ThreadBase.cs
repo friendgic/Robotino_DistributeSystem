@@ -12,8 +12,7 @@ namespace DistributeSystem
 
         private Thread myThread;
         private AutoResetEvent autoEvent = new AutoResetEvent(false);
-        public bool threadEnable = false;
-        public bool threadRunning=false;
+        public bool threadEnable = false; 
         public Queue<MyTask> taskQueue=new Queue<MyTask>();
         public Queue<DSEvent> EventQueue = new Queue<DSEvent>();
         public Queue<string> MsgQueue = new Queue<string>();
@@ -39,7 +38,7 @@ namespace DistributeSystem
             MsgQueue = new Queue<string>();
             if (!threadEnable)
             {
-                threadEnable = true;
+                threadEnable = true; 
                 if (myThread != null)
                 {
                     Release();
@@ -50,13 +49,15 @@ namespace DistributeSystem
         }
         protected void Release()
         {
-            threadEnable = false;
-            autoEvent.Set();
-            myThread = null;
+            lock (locker)
+            {
+                threadEnable = false;
+                autoEvent.Set();
+                myThread = null;
+            }
         }
         protected void RUN()
         {
-            threadRunning = true;
             while (threadEnable)
             {
                 //CALL MAIN FUNCITON
@@ -69,8 +70,7 @@ namespace DistributeSystem
 
                 autoEvent.WaitOne();
                 if (!threadEnable) break;
-            }
-            threadRunning = false;
+            } 
             SetEvent(DSEvent.Released,"Program stop");
         }
         protected virtual void RunTask(MyTask task)
@@ -80,9 +80,13 @@ namespace DistributeSystem
         }
         protected void SetNextTask(MyTask task, bool start = true)
         {
+            lock (locker)
+            {
+
             taskQueue.Enqueue(task);
             if (start)
                 autoEvent.Set();
+            }
         }
 
         #endregion
@@ -92,21 +96,32 @@ namespace DistributeSystem
 
         private void AddMsg(string msg)
         {
+            lock (locker)
+            {
+
             if (MsgQueue.Count > MsgQueueLength) MsgQueue.Dequeue();
             MsgQueue.Enqueue(msg);
+            }
         }
         public string ReadADebugMsg()
         {
-            if (MsgQueue.Count > 0)
-                return MsgQueue.Dequeue();
-            else
-                return string .Empty;
+            string msg=string.Empty;
+            lock (locker)
+            {
+                if(MsgQueue.Count>0)
+                   msg= MsgQueue.Dequeue();
+            }
+            return msg;
         }
         public DSEvent GetEvent()
         {
+            lock (locker)
+            {
+
             if (EventQueue.Count > 0)
             {
                 return EventQueue.Dequeue();
+            }
             }
             return DSEvent.None;
         }
@@ -114,38 +129,63 @@ namespace DistributeSystem
 
         public void SetEvent(DSEvent eve, string msg = " " , bool quit=false)
         {
-            if (EventQueue == null)
-                EventQueue = new Queue<DSEvent>();
-            EventQueue.Enqueue(eve);
-            string str = "[" + eve.ToString() + "] " + msg+"\n";
-            if(msg!=" ")
+            lock (locker)
             {
+                if (EventQueue == null)
+                    EventQueue = new Queue<DSEvent>();
+                EventQueue.Enqueue(eve);
+                string str = "[" + eve.ToString() + "] " + msg + "\n";
+                if (msg != " ")
+                {
 
-            AddMsg(str);
-            Console.WriteLine(str);
+                    AddMsg(str);
+                    Console.WriteLine(str);
+                }
             }
             if(quit)
             if (eve == DSEvent.Error) throw new Exception();
         }
         public bool CheckEvent(double time, DSEvent successful, DSEvent failure)
         {
+            lock (locker)
+            {
+
+            if (!threadEnable)
+            {
+                return false;
+            }
+            }
             DateTime t = DateTime.Now;
             while ((DateTime.Now - t).TotalMilliseconds < time)
             {
-                var eve = GetEvent();
-                if (eve != DSEvent.None)
+                int resulttest = 0;
+                lock (locker)
                 {
-                    if (eve == successful)
+                    for (int i = 0; i < EventQueue.Count; i++)
                     {
-                        return true;
+                        var item = EventQueue.Dequeue();
+                        if (item != DSEvent.None)
+                        {
+                            if (item == successful)
+                            {
+                                resulttest = 1;
+                            }
+                            if (item == failure)
+                            {
+                                resulttest = 2;
+                            }
+                        }
                     }
-                    if (eve == failure)
-                    {
-                        return false;
-                    }
-                    SetEvent(eve);//turn back event;
                 }
-                Thread.Sleep(1);
+                if (resulttest == 1)
+                {
+                    return true;
+                }
+                if (resulttest == 2)
+                {
+                    return false;
+                }
+                Thread.Sleep(10);
             }
             SetEvent(DSEvent.Error, "Time out");
             return false;

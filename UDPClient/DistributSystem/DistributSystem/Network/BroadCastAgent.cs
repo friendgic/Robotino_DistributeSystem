@@ -6,60 +6,28 @@ using System.Timers;
 
 namespace DistributeSystem
 {
-    public class BroadCastAgent: NetworkPackageProcess
+    public class BroadCastAgent : Agent
     {
-        #region Init
-        public List<BroadCastAgent> list = new List<BroadCastAgent>();
-
-        #endregion
-
         #region Interface
         public override bool Start(int port = 11000)
         {
-            var ok = base.Start(port);
-            if (!ok) return false;
-            //set list
-            list = new List<BroadCastAgent>();
- 
-            return true;
+            uniquePort = false;
+            return base.Start(port);
         }
-
-        public override void Close()
-        { 
-            base.Close();
-        }
-
-     
-    
         #endregion
-  
-        #region Private / protect method 
+
+        #region Private / protect method     
         protected override void CommingPackage(NetworkPackageCompress pack)
         {
             base.CommingPackage(pack);
             byte pulse = 0;
             if (pack.GetFromBin<byte>("#", out pulse))
-            {
-                BroadCastAgent newAgent = new BroadCastAgent();
-                newAgent.localIP = pack.targetIP;
-                newAgent.localPort = pack.targetPort;
+            { 
+                var ip= pack.targetIPs[0];
+                var port= pack.targetPorts[0];
+                AddFriend(ip, port);
 
-                bool find = false;
-               for(int i=0;i<list.Count;i++)
-                {
-                    var item = list[i];
-                    if(item.localIP==newAgent.localIP && item.localPort == newAgent.localPort)
-                    {
-                        find = true;
-                        list[i] = newAgent;
-                        break;
-                    } 
-                }
-               if(!find)
-                        list.Add(newAgent);
-
-                SetEvent(DSEvent.Receive, "Pulse " + pulse.ToString() + " < " + pack.targetIP + ":" + pack.targetPort.ToString());
-
+                SetEvent(DSEvent.Receive, "Pulse " + pulse.ToString() + " < " + ip + ":" +port.ToString());
             }
         }
         #endregion

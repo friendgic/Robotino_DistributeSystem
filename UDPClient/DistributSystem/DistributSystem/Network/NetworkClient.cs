@@ -12,6 +12,7 @@ namespace DistributeSystem
         #region Init
         public string localIP;
         public int localPort=11000;
+        public bool uniquePort = true;
         protected UdpClient client;
 
         public NetworkClient()
@@ -26,7 +27,7 @@ namespace DistributeSystem
         {
             get
             {
-                return threadRunning;
+                return threadEnable;
             }
         }
         protected override void RunTask(MyTask task)
@@ -65,7 +66,7 @@ namespace DistributeSystem
                     client.Close();
                 }
                 localIP = GetLocalIP();
-                client = new UdpClient(localPort);
+                client = new UdpClient();
 
                 //////////////////////////////////////////// avoid lose connection//////////////////////////////////////////////////////////
                 Socket s = client.Client;
@@ -73,6 +74,10 @@ namespace DistributeSystem
                 uint IOC_VENDOR = 0x18000000;
                 uint SIO_UDP_CONNRESET = IOC_IN | IOC_VENDOR | 12;
                 s.IOControl((int)SIO_UDP_CONNRESET, new byte[] { Convert.ToByte(false) }, null);
+                ////////////////////////////////////////////Enable the unique port test////////////////////////////////////////////////////
+                if(!uniquePort)
+                    client.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+                client.Client.Bind(new IPEndPoint(IPAddress.Any, localPort));
                 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
                 SetEvent(DSEvent.StartClient, "Start Client Successful\n ip="+localIP+"\nPort:"+localPort);
@@ -141,11 +146,25 @@ namespace DistributeSystem
             SetNextTask(MyTask.Close);
             CheckEvent(1000, DSEvent.Released, DSEvent.Error);
         }
+        protected void Send(byte[]data, List<string> ips, List<int> ports)
+        {
+            for(int i = 0; i < ips.Count; i++)
+            {
+                var ip = ips[i];
+                var port = ports[i];
+                Send(data, ip, port);
+            }
+        }
         protected void Send(byte[] data,string ip,int port)
         {
             IPAddress ipAddress = IPAddress.Parse(ip);
             IPEndPoint ipEndPoint = new IPEndPoint(ipAddress, port);
             client.Send(data, data.Length, ipEndPoint);
+        }
+
+        public string GetIPwithPort()
+        {
+            return localIP + ":" + localPort;
         }
         #endregion
 

@@ -60,6 +60,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Network\Agent.cs" />
     <Compile Include="Network\BroadCastAgent.cs" />
     <Compile Include="Network\DataStructure.cs" />
     <Compile Include="Network\NetworkClient.cs" />
@@ -70,7 +71,9 @@
     <Compile Include="Package\NetworkPackage.cs" />
     <Compile Include="Package\NetworkPackageBin.cs" />
     <Compile Include="Package\NetworkPackageCompress.cs" />
+    <Compile Include="Package\Parameters.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RobotinoController\RobotinoC.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

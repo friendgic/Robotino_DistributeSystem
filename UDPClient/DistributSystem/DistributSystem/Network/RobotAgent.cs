@@ -6,42 +6,47 @@ using System.Timers;
 
 namespace DistributeSystem
 {
-    public class RobotAgent:NetworkPackageProcess
+    public class RobotAgent:Agent
     {
         #region Init
- 
-        public List<string> targetList = new List<string>();
+        public Parameters parameters=new Parameters();
+        public RobotinoController.Robotino robot = new RobotinoController.Robotino();
 
-        private byte pulseCount = 0;
-        private BroadCastAgent bcAgent=new BroadCastAgent();
+        private BroadCastAgent bcAgent;
+        private Timer pulseTimer,paraTimer;
+        private byte pulseCount=0;
+        
         #endregion
+
         #region Interface
-        Timer aTimer;
         public override bool Start(int port = 11000)
         {
+            uniquePort = true;
             var ok=  base.Start(port);
-            if (!ok) return false;
-
+            if (!ok)
+            {
+                Close();
+                return false;
+            }
             //start timmer
-            aTimer = new System.Timers.Timer(1000); 
-            aTimer.Elapsed += OnTimedEvent;
-            aTimer.AutoReset = true;
-            aTimer.Enabled = true;
-            //set list
-            
-            targetList = new List<string>();
-            //set other
-            pulseCount = 0;
+            pulseTimer = new System.Timers.Timer(1000);
+            pulseTimer.Elapsed += OnTimedEvent_Pulse;
+            pulseTimer.AutoReset = true;
+            pulseTimer.Enabled = true;
 
+            paraTimer = new System.Timers.Timer(20);
+            paraTimer.Elapsed += OnTimedEvent_Para;
+            paraTimer.AutoReset = true;
+            paraTimer.Enabled = true;
             //broadcastAgent
+            bcAgent = new BroadCastAgent();
             bcAgent.Start(12000);
             return true;
         }
-
         public override void Close()
         {
-            if(aTimer!=null)
-            aTimer.Close();
+            if(pulseTimer!=null)
+            pulseTimer.Close();
 
             if (bcAgent != null)
             {
@@ -49,54 +54,141 @@ namespace DistributeSystem
             }
             base.Close();
         }
-
-        public void GetConnectedAgentFromBC(out List<string>ips,out List<int>ports)
+        public List<string> GetConnectedAgentFromBC()
         {
-            ips = new List<string>();
-            ports = new List<int>();
-            for(int i = 0; i < bcAgent.list.Count; i++)
+            List<string> ret = new List<string>();
+            for(int i = 0; i < bcAgent.friends.Count; i++)
             {
-                var item = bcAgent.list[i];
-                ips.Add( item.localIP);
-                ports.Add(item.localPort);
+                var item = bcAgent.friends[i];
+                ret.Add(item.localIP + ":" + item.localPort);
             }
+            return ret;
+        }
+        
+        public void AddTarget(string target)
+        {
+            string ip;
+            int port;
+            try
+            {
+                var ipspilt = target.Split(':');
+                  ip = ipspilt[0];
+                  port = int.Parse(ipspilt[1]);
+            }
+            catch (Exception e)
+            {
+                SetEvent(DSEvent.Error, "Invalid ip");
+                return;
+            }
+            if (ip == null) return;
+            AddFriend(ip, port);
+
         }
         #endregion
-
         #region Thread
         protected override void RunTask(MyTask task)
         {
             base.RunTask(task);
             switch (task)
             {
-                case MyTask.Agent_Pulse:
+                case MyTask.RobotAgent_Para:
+                    SendOutPara();
+                    break;
+                case MyTask.RobotAgent_Pulse:
                     SendOutPulse();
                     break;
             }
         }
         #endregion
+        #region override
+        public override void AddFriend(string ip, int port)
+        {
+            RobotAgent newAgent = new RobotAgent();
+            newAgent.localIP = ip;
+            newAgent.localPort = port;
+            newAgent.Feed(3);
+
+            bool find = false;
+            for (int i = 0; i < friends.Count; i++)
+            {
+                var item = friends[i];
+                if (item.localIP == newAgent.localIP && item.localPort == newAgent.localPort)
+                {
+                    find = true;
+                    friends[i].Feed(3);
+                    break;
+                }
+            }
+            if (!find)
+            {
+                friends.Add(newAgent);
+                SetEvent(DSEvent.Agent, "New Agent");
+            }
+
+        }
+        #endregion
 
         #region Private / protect method
 
-        private void OnTimedEvent(Object source, ElapsedEventArgs e)
+        private void OnTimedEvent_Para(object sender, ElapsedEventArgs e)
         {
-            SetNextTask(MyTask.Agent_Pulse);
+            for(int i = 0; i < 9; i++)
+            {
+                var sensor=robot.ReadDistanceSensor(i);
+                parameters.SetDisSensor(i, sensor);
+            }
+            SetNextTask(MyTask.RobotAgent_Para);
+        }
+        private void OnTimedEvent_Pulse(Object source, ElapsedEventArgs e)
+        {
+            SetNextTask(MyTask.RobotAgent_Pulse);
         }
 
+        private void SendOutPara()
+        {
+            if (parameters.changed)
+            { 
+                parameters.BuildUpPackage(ref sendingPack);
+                //send to friend
+                for (int i = 0; i < friends.Count; i++)
+                {
+                    AddSendTarget(friends[i].localIP, friends[i].localPort);
+                }
+
+                SendPackage();
+            }
+        }
         private void SendOutPulse()
         {
             sendingPack.Add("#", pulseCount++);
-            SendPackage("255.255.255.255", bcAgent.localPort);
+            
+            //boardcast
+            AddSendTarget("255.255.255.255", bcAgent.localPort);
+
+            //send to friend
+            for(int i = 0; i < friends.Count; i++)
+            {
+                AddSendTarget(friends[i].localIP, friends[i].localPort);
+            }
+
+            SendPackage();
         }
 
         protected override void CommingPackage(NetworkPackageCompress pack)
         {
             base.CommingPackage(pack);
+                var ip = pack.targetIPs[0];
+                var port = pack.targetPorts[0];
+
             byte pulse = 0;
-            //if (pack.GetFromBin<byte>("#", out pulse))
-            //{
-            //    SetEvent(DSEvent.Receive, "Pulse "+pulse.ToString() +" < "+ pack.targetIP+":"+pack.targetPort.ToString());
-            //}
+            if (pack.GetFromBin<byte>("#", out pulse))
+            {
+                AddFriend(ip, port);
+                parameters.MarkAllChanged();
+            }
+
+            var friend=GetFriend(ip, port) as RobotAgent;
+            friend.parameters.ReceivePackage(pack);
         }
         #endregion
     }
