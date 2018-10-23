@@ -131,7 +131,7 @@ namespace DistributeSystem
                 var ip = ipHostInfo.AddressList[i];
                 if (ip.AddressFamily == AddressFamily.InterNetwork)
                 {
-                    if(ip.ToString().Contains("192.168."))
+                    if(ip.ToString().Contains(Configure.IPprefix))
                         ipAddress = ip;
                 }
             }

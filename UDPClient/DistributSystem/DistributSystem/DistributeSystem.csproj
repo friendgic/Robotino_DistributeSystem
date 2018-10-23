@@ -60,6 +60,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Config\Configure.cs" />
     <Compile Include="Network\Agent.cs" />
     <Compile Include="Network\BroadCastAgent.cs" />
     <Compile Include="Network\DataStructure.cs" />

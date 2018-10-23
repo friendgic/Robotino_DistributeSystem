@@ -22,6 +22,7 @@ namespace DistributeSystem
         #region Interface
         public override bool Start(int port = 11000)
         {
+            Configure.Read();
             uniquePort = true;
             var ok=  base.Start(port);
             if (!ok)
@@ -45,6 +46,8 @@ namespace DistributeSystem
             //robot
             robot.mChangedEvent -= robotChangedEvent;
             robot.mChangedEvent += robotChangedEvent;
+            //parameter
+            parameters.name = Configure.name;
             return true;
         }
 
