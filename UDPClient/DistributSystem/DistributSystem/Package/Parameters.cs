@@ -9,7 +9,10 @@ namespace DistributeSystem
     {
         #region Init
         private object locker = new object();
-        public List<float> v_Movement = new List<float>(4) { 0, 0, 0, 0 };
+        public string v_name = "Robotino";
+        public bool c_name=false;
+
+        public List<float> v_Movement = new List<float>(3) { 0, 0, 0 };
         public bool c_Movement = false;
 
         public List<float> v_DisSensor = new List<float>(9) { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
@@ -17,6 +20,18 @@ namespace DistributeSystem
         #endregion
 
         #region Interface
+        public string name
+        {
+            get
+            {
+                return v_name;
+            }
+            set
+            {
+                v_name = value;
+                c_name = true;
+            }
+        }
         public float speed_x
         {
             get { return v_Movement[0]; }
@@ -37,26 +52,17 @@ namespace DistributeSystem
                 { v_Movement[1] = value; c_Movement = true; }
             }
         }
-        public float speed_z
-        {
-            get { return v_Movement[2]; }
-            set
-            {
-                lock (locker)
-                { v_Movement[2] = value; c_Movement = true; }
-            }
-        }
         public float rot
         {
-            get { return v_Movement[3]; }
+            get { return v_Movement[2]; }
             set 
-            {  lock (locker){ v_Movement[3] = value; c_Movement = true; } }
+            {  lock (locker){ v_Movement[2] = value; c_Movement = true; } }
         }
         public bool changed
         {
             get
             {
-                return c_Movement | c_DisSensor;
+                return c_Movement | c_DisSensor | c_name;
             }
         }
 
@@ -66,6 +72,7 @@ namespace DistributeSystem
             {
                 c_Movement = true;
                 c_DisSensor = true;
+                c_name = true;
             }
         }
         public void SetDisSensor(int n, float val)
@@ -94,6 +101,11 @@ namespace DistributeSystem
                     packageCompress.Add("c_DisSensor", v_DisSensor);
                     c_DisSensor = false;
                 }
+                if (c_name)
+                {
+                    packageCompress.Add("c_Name", v_name);
+                    c_name = false;
+                }
             }
         }
         public void ReceivePackage(NetworkPackageCompress pack)
@@ -109,6 +121,11 @@ namespace DistributeSystem
                 if (pack.GetFromBin("c_DisSensor", out dat2))
                 {
                     v_DisSensor = dat2; 
+                }
+                string str;
+                if(pack.GetFromBin("c_Name",out str))
+                {
+                    v_name = str;
                 }
             }
         }

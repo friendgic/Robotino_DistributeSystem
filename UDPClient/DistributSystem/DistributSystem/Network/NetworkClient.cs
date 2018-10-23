@@ -77,7 +77,12 @@ namespace DistributeSystem
                 ////////////////////////////////////////////Enable the unique port test////////////////////////////////////////////////////
                 if(!uniquePort)
                     client.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
-                client.Client.Bind(new IPEndPoint(IPAddress.Any, localPort));
+
+                ///////////////////////////////////////////Ip specify///////////////////////////////////////////////////////////////////////////////
+
+                IPAddress ipAddress = IPAddress.Parse(localIP);
+                IPEndPoint localEndPoint = new IPEndPoint(ipAddress, localPort);
+                client.Client.Bind(localEndPoint);
                 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
                 SetEvent(DSEvent.StartClient, "Start Client Successful\n ip="+localIP+"\nPort:"+localPort);
@@ -126,7 +131,8 @@ namespace DistributeSystem
                 var ip = ipHostInfo.AddressList[i];
                 if (ip.AddressFamily == AddressFamily.InterNetwork)
                 {
-                    ipAddress = ip;
+                    if(ip.ToString().Contains("192.168."))
+                        ipAddress = ip;
                 }
             }
             return ipAddress.ToString();

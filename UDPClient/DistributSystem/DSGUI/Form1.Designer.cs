@@ -51,6 +51,8 @@
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.groupBox6 = new System.Windows.Forms.GroupBox();
             this.listBox3 = new System.Windows.Forms.ListBox();
+            this.button8 = new System.Windows.Forms.Button();
+            this.timer2 = new System.Windows.Forms.Timer(this.components);
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -61,6 +63,7 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.button8);
             this.groupBox1.Controls.Add(this.button7);
             this.groupBox1.Controls.Add(this.button2);
             this.groupBox1.Controls.Add(this.button1);
@@ -75,7 +78,7 @@
             // 
             // button7
             // 
-            this.button7.Location = new System.Drawing.Point(245, 19);
+            this.button7.Location = new System.Drawing.Point(184, 19);
             this.button7.Name = "button7";
             this.button7.Size = new System.Drawing.Size(43, 23);
             this.button7.TabIndex = 4;
@@ -85,12 +88,13 @@
             // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(294, 20);
+            this.button2.Location = new System.Drawing.Point(233, 19);
             this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(61, 23);
+            this.button2.Size = new System.Drawing.Size(53, 23);
             this.button2.TabIndex = 3;
-            this.button2.Text = "Demo";
+            this.button2.Text = "Robot1";
             this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
             // button1
             // 
@@ -294,6 +298,20 @@
             this.listBox3.TabIndex = 0;
             this.listBox3.SelectedIndexChanged += new System.EventHandler(this.listBox3_SelectedIndexChanged);
             // 
+            // button8
+            // 
+            this.button8.Location = new System.Drawing.Point(292, 19);
+            this.button8.Name = "button8";
+            this.button8.Size = new System.Drawing.Size(63, 23);
+            this.button8.TabIndex = 5;
+            this.button8.Text = "Robot2";
+            this.button8.UseVisualStyleBackColor = true;
+            this.button8.Click += new System.EventHandler(this.button8_Click);
+            // 
+            // timer2
+            // 
+            this.timer2.Tick += new System.EventHandler(this.timer2_Tick);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -345,6 +363,8 @@
         private System.Windows.Forms.ListBox listBox3;
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.Button button7;
+        private System.Windows.Forms.Button button8;
+        private System.Windows.Forms.Timer timer2;
     }
 }
 

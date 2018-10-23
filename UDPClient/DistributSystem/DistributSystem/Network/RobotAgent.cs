@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Timers;
+using RobotinoController;
 
 namespace DistributeSystem
 {
@@ -41,8 +42,13 @@ namespace DistributeSystem
             //broadcastAgent
             bcAgent = new BroadCastAgent();
             bcAgent.Start(12000);
+            //robot
+            robot.mChangedEvent -= robotChangedEvent;
+            robot.mChangedEvent += robotChangedEvent;
             return true;
         }
+
+
         public override void Close()
         {
             if(pulseTimer!=null)
@@ -85,6 +91,7 @@ namespace DistributeSystem
 
         }
         #endregion
+        
         #region Thread
         protected override void RunTask(MyTask task)
         {
@@ -100,6 +107,7 @@ namespace DistributeSystem
             }
         }
         #endregion
+
         #region override
         public override void AddFriend(string ip, int port)
         {
@@ -130,6 +138,12 @@ namespace DistributeSystem
 
         #region Private / protect method
 
+        private void robotChangedEvent(float x,float y,float r)
+        {
+            parameters.speed_x = x;
+            parameters.speed_y = y;
+            parameters.rot = r;
+        }
         private void OnTimedEvent_Para(object sender, ElapsedEventArgs e)
         {
             for(int i = 0; i < 9; i++)

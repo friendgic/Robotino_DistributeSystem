@@ -14,6 +14,8 @@ namespace DSGUI
     {
         public RobotAgent robotAgent=new RobotAgent();
         private RobotAgent showingParamerAgent;
+        private int selectRobot = 1;
+        private int FirstRobotIndex=0;
         public Form1()
         {
             InitializeComponent();
@@ -51,6 +53,7 @@ namespace DSGUI
             else
             {
                 robotAgent.Close();
+                timer2.Stop();
             }
         }
 
@@ -98,9 +101,10 @@ namespace DSGUI
                     if (showingParamerAgent != null)
                     {
                         var par = showingParamerAgent.parameters;
-                        listBox2.Items[1] = string.Format("Speed:{0},{1},{2}", par.speed_x,par.speed_y,par.speed_z);
+                        listBox2.Items[0] = string.Format("Name:{0}",par.name);
+                        listBox2.Items[1] = string.Format("Speed:{0},{1}", par.speed_x,par.speed_y);
                         listBox2.Items[2] = string.Format("Rotation:{0}", par.rot);
-                        listBox2.Items[3] = string.Format("DisSensor:{0}  {1} ", par.v_DisSensor[0], par.v_DisSensor[1]);
+                        listBox2.Items[3] = string.Format("DisSensor:{0}  {1} ", par.v_DisSensor[2], par.v_DisSensor[3]);
                     }
                     else
                     {
@@ -190,6 +194,97 @@ namespace DSGUI
             ControllerPannel cp = new ControllerPannel();
             cp.robot = robotAgent. robot;
             cp.Show();
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            if (timer2.Enabled)
+            {
+                timer2.Stop();
+            }
+            else
+            {
+                if (robotAgent.Active)
+                {
+                    robotAgent.parameters.name = "Robot 1";
+                }
+                timer2.Start();
+            }
+            selectRobot = 1;
+        }
+
+        private void button8_Click(object sender, EventArgs e)
+        {
+            if (timer2.Enabled)
+            {
+                timer2.Stop();
+            }
+            else
+            {
+                timer2.Start();
+
+                if (robotAgent.Active)
+                {
+                    robotAgent.parameters.name = "Robot 2";
+
+                    var friends = robotAgent.friends;
+                    FirstRobotIndex = -1;
+                    for (int i = 0; i < friends.Count; i++)
+                    {
+                        var item = friends[i] as RobotAgent;
+                        if(item.parameters.name=="Robot 1")
+                        {
+                            FirstRobotIndex = i;
+                        }
+                    }
+                    if (FirstRobotIndex == -1)
+                    {
+                        MessageBox.Show("not find robot 1");
+                        timer2.Stop();
+                    }
+                }
+            }
+            selectRobot = 2;
+        }
+
+        private void timer2_Tick(object sender, EventArgs e)
+        {
+            
+            if (!robotAgent.Active)
+            {
+                return;
+            }
+            switch (selectRobot)
+            {
+                case 1:
+                    {
+                        var sensor2 = robotAgent.parameters.v_DisSensor[2];
+                        var sensor3 = robotAgent.parameters.v_DisSensor[3];
+                        var mid = (sensor2 + sensor3) / 2f;
+                        if (mid < 0.7f)
+                            robotAgent.robot.ManualControlMove(0.04f, 0f,0f);
+                        else
+                            robotAgent.robot.ManualControlMove(0.0f, 0f, 0f);
+
+                        break;
+                    }
+                case 2:
+                    {
+                        var robot1 = robotAgent.friends[FirstRobotIndex] as RobotAgent;
+                        var sensor2 = robot1.parameters.v_DisSensor[2];
+                        var sensor3 = robot1.parameters.v_DisSensor[3];
+                        var mid = (sensor2 + sensor3) / 2f;
+                        if (mid > 0.7f)
+                        {
+                            robotAgent.robot.ManualControlMove(0.04f, 0f, 0f);
+                        }
+                        else
+                        {
+                            robotAgent.robot.ManualControlMove(0.0f, 0f, 0f);
+                        }
+                            break;
+                    }
+            }
         }
     }
 }

@@ -292,7 +292,10 @@ namespace RobotinoController
         private int com;
         private int omniDrive;
         private int[] distanceSensor=new int[9];
-        private int disTest;
+
+        public delegate void ChangedEvent(float speedX, float speedY, float rot);
+        public event ChangedEvent mChangedEvent;
+
         public void Connect(string ip)
         {
             com = CDLL.Com_construct();
@@ -323,6 +326,10 @@ namespace RobotinoController
         }
         public void ManualControlMove(float speedX, float speedY, float rot)
         {
+            if (mChangedEvent != null)
+            {
+                mChangedEvent.Invoke(speedX, speedY,  rot);
+            }
             if (!CDLL.OmniDrive_setVelocity(omniDrive, speedY, speedX, rot)) throw new Exception("Control error"); ;
         }
         public float ReadDistanceSensor(int n)
