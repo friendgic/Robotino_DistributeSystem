@@ -154,6 +154,9 @@ namespace DistributeSystem
                 var sensor=robot.ReadDistanceSensor(i);
                 parameters.SetDisSensor(i, sensor);
             }
+            Random r = new Random();
+            var value = r.Next(0, 100);
+            parameters.SetDisSensor(2, value);
             SetNextTask(MyTask.RobotAgent_Para);
         }
         private void OnTimedEvent_Pulse(Object source, ElapsedEventArgs e)
@@ -204,7 +207,13 @@ namespace DistributeSystem
                 parameters.MarkAllChanged();
             }
 
-            var friend=GetFriend(ip, port) as RobotAgent;
+            var friend = GetFriend(ip, port) as RobotAgent;
+            if (friend == null)
+            {
+                AddFriend(ip, port);
+                parameters.MarkAllChanged();
+                return;
+            }
             friend.parameters.ReceivePackage(pack);
         }
         #endregion
