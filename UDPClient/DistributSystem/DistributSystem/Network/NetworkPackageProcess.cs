@@ -69,9 +69,9 @@ namespace DistributeSystem
             newPack.AddTarget(e.Address.ToString(),e.Port);
             CommingPackage(newPack);
             }
-            catch (Exception)
+            catch (Exception ee )
             {
-                SetEvent(DSEvent.Error, "Receive Package error");
+                SetEvent(DSEvent.Error, "Receive Package error" + ee.ToString());
             }
         }
         protected virtual void CommingPackage(NetworkPackageCompress pack)

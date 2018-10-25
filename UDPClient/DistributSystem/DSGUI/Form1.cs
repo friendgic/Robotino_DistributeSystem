@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Windows.Forms;
 using DistributeSystem;
 
@@ -141,7 +142,8 @@ namespace DSGUI
         {
             if (robotAgent.Active)
             {
-                robotAgent.parameters.speed_x++;
+                dt = DateTime.Now;
+                timer3.Start();
             }
         }
 
@@ -252,38 +254,81 @@ namespace DSGUI
             
             if (!robotAgent.Active)
             {
+                timer2.Stop();
                 return;
             }
-            switch (selectRobot)
+            try
             {
-                case 1:
-                    {
-                        var sensor2 = robotAgent.parameters.v_DisSensor[2];
-                        var sensor3 = robotAgent.parameters.v_DisSensor[3];
-                        var mid = (sensor2 + sensor3) / 2f;
-                        if (mid < 0.7f)
-                            robotAgent.robot.ManualControlMove(0.04f, 0f,0f);
-                        else
-                            robotAgent.robot.ManualControlMove(0.0f, 0f, 0f);
 
-                        break;
-                    }
-                case 2:
-                    {
-                        var robot1 = robotAgent.friends[FirstRobotIndex] as RobotAgent;
-                        var sensor2 = robot1.parameters.v_DisSensor[2];
-                        var sensor3 = robot1.parameters.v_DisSensor[3];
-                        var mid = (sensor2 + sensor3) / 2f;
-                        if (mid > 0.7f)
+                switch (selectRobot)
+                {
+                    case 1:
                         {
-                            robotAgent.robot.ManualControlMove(0.04f, 0f, 0f);
-                        }
-                        else
-                        {
-                            robotAgent.robot.ManualControlMove(0.0f, 0f, 0f);
-                        }
+                            var sensor2 = robotAgent.parameters.v_DisSensor[2];
+                            var sensor3 = robotAgent.parameters.v_DisSensor[3];
+                            var mid = (sensor2 + sensor3) / 2f;
+                            if (mid < 0.7f)
+                                robotAgent.robot.ManualControlMove(0.04f, 0f, 0f);
+                            else
+                                robotAgent.robot.ManualControlMove(0.0f, 0f, 0f);
+
                             break;
+                        }
+                    case 2:
+                        {
+                            var robot1 = robotAgent.friends[FirstRobotIndex] as RobotAgent;
+                            var sensor2 = robot1.parameters.v_DisSensor[2];
+                            var sensor3 = robot1.parameters.v_DisSensor[3];
+                            var mid = (sensor2 + sensor3) / 2f;
+                            if (mid > 0.7f)
+                            {
+                                robotAgent.robot.ManualControlMove(0.04f, 0f, 0f);
+                            }
+                            else
+                            {
+                                robotAgent.robot.ManualControlMove(0.0f, 0f, 0f);
+                            }
+                            break;
+                        }
+                }
+            }
+            catch (Exception exc)
+            {
+                timer2.Stop();
+                MessageBox.Show(exc.ToString());
+            }
+        }
+
+        private float test;
+        DateTime dt;
+        double mid = 0;
+        private void timer3_Tick(object sender, EventArgs e)
+        {
+            if (robotAgent.Active)
+            {
+                for(int i = 0; i < 10000; i++)
+                {
+
+                    var value = robotAgent.robot.ReadDistanceSensor(0);
+                    if (test != value)
+                    {
+
+                        TimeSpan ts = DateTime.Now - dt;
+                        var dtime = ts.TotalMilliseconds.ToString();
+                        test = value;
+                        if(ts.TotalMilliseconds>0 && ts.TotalMilliseconds < 20)
+                        {
+                            mid = mid * 0.2 + ts.TotalMilliseconds * 0.8;
+                        }
+                        Console.WriteLine("dat:" + test + " time:" + dtime + " mid:" + mid);
+                        dt = DateTime.Now;
                     }
+                
+                    for(int k = 0; k < 10000; k++)
+                    {
+
+                    }
+                }
             }
         }
     }

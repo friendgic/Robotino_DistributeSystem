@@ -205,6 +205,14 @@ namespace DistributeSystem
             }
 
             var friend=GetFriend(ip, port) as RobotAgent;
+            if (friend == null)
+            {
+                AddFriend(ip, port);
+                parameters.MarkAllChanged();
+                return;
+            }
+
+             
             friend.parameters.ReceivePackage(pack);
         }
         #endregion
