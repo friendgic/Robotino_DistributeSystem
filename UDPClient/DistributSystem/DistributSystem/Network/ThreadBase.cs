@@ -135,11 +135,10 @@ namespace DistributeSystem
                     EventQueue = new Queue<DSEvent>();
                 EventQueue.Enqueue(eve);
                 string str = "[" + eve.ToString() + "] " + msg + "\n";
-                if (msg != " ")
-                {
+                if (msg != " ") {
 
                     AddMsg(str);
-                    Console.WriteLine(str);
+                    if(Configure.debug)Console.WriteLine(str);
                 }
             }
             if(quit)

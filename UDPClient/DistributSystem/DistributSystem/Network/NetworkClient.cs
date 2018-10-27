@@ -14,6 +14,7 @@ namespace DistributeSystem
         public int localPort=11000;
         public bool uniquePort = true;
         protected UdpClient client;
+        public string specialIP = "None";
 
         public NetworkClient()
         {
@@ -73,7 +74,11 @@ namespace DistributeSystem
                 uint IOC_IN = 0x80000000;
                 uint IOC_VENDOR = 0x18000000;
                 uint SIO_UDP_CONNRESET = IOC_IN | IOC_VENDOR | 12;
+           
+                if(!Configure.LINUX)
                 s.IOControl((int)SIO_UDP_CONNRESET, new byte[] { Convert.ToByte(false) }, null);
+             
+
                 ////////////////////////////////////////////Enable the unique port test////////////////////////////////////////////////////
                 if(!uniquePort)
                     client.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
@@ -90,7 +95,7 @@ namespace DistributeSystem
             }
             catch (Exception e)
             { 
-                SetEvent(DSEvent.Error, "Start Client Error");
+                SetEvent(DSEvent.Error, "Start Client Error" );
             }
         }
 
@@ -124,18 +129,23 @@ namespace DistributeSystem
 
         private string GetLocalIP()
         {
+            if(specialIP=="None"){
+
             IPHostEntry ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
             IPAddress ipAddress = ipHostInfo.AddressList[0];
-            for (int i = 0; i < ipHostInfo.AddressList.Length; i++)
-            {
-                var ip = ipHostInfo.AddressList[i];
-                if (ip.AddressFamily == AddressFamily.InterNetwork)
+                for (int i = 0; i < ipHostInfo.AddressList.Length; i++)
                 {
-                    if(ip.ToString().Contains(Configure.IPprefix))
-                        ipAddress = ip;
+                    var ip = ipHostInfo.AddressList[i];
+                    if (ip.AddressFamily == AddressFamily.InterNetwork)
+                    {
+                        if (ip.ToString().Contains(Configure.IPprefix))
+                            ipAddress = ip;
+                    }
                 }
+                return ipAddress.ToString();
+            }else{
+                return specialIP;
             }
-            return ipAddress.ToString();
         }
         #endregion
 

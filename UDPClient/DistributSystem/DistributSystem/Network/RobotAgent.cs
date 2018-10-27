@@ -47,7 +47,7 @@ namespace DistributeSystem
             robot.mChangedEvent -= robotChangedEvent;
             robot.mChangedEvent += robotChangedEvent;
             //parameter
-            parameters.name = Configure.name;
+            parameters.SetName( Configure.name);
             return true;
         }
 
@@ -66,6 +66,7 @@ namespace DistributeSystem
         public List<string> GetConnectedAgentFromBC()
         {
             List<string> ret = new List<string>();
+            if (bcAgent == null) return ret;
             for(int i = 0; i < bcAgent.friends.Count; i++)
             {
                 var item = bcAgent.friends[i];
@@ -143,16 +144,17 @@ namespace DistributeSystem
 
         private void robotChangedEvent(float x,float y,float r)
         {
-            parameters.speed_x = x;
-            parameters.speed_y = y;
-            parameters.rot = r;
+            parameters.SetMovement(x, y, r);
         }
         private void OnTimedEvent_Para(object sender, ElapsedEventArgs e)
         {
+            if(!Configure.LINUX){
+
             for(int i = 0; i < 9; i++)
             {
                 var sensor=robot.ReadDistanceSensor(i);
                 parameters.SetDisSensor(i, sensor);
+            }
             }
             SetNextTask(MyTask.RobotAgent_Para);
         }

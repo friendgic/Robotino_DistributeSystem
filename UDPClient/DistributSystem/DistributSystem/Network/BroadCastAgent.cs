@@ -12,6 +12,8 @@ namespace DistributeSystem
         public override bool Start(int port = 11000)
         {
             uniquePort = false;
+            if(Configure.LINUX)
+                specialIP = "255.255.255.255";
             return base.Start(port);
         }
         #endregion

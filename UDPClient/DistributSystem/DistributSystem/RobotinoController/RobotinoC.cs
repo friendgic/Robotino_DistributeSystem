@@ -42,7 +42,7 @@ namespace RobotinoController
         /// <param name="addressBuffersSize">The size of addressBuffer.</param>
         /// <returns></returns>
         [DllImport("rec_robotino_api2.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool Com_address(int id, [MarshalAs(UnmanagedType.LPStr)] string addressBuffer, uint addressBuffersSize);
+        public static extern bool Com_address(int id, [MarshalAs(UnmanagedType.LPStr)] string addressBuffer, int addressBuffersSize);
 
         /// <summary>
         /// running on your machine. The default port is 8080, but you might change this.
@@ -162,10 +162,10 @@ namespace RobotinoController
         /// <param name="n">The input number. Range [0; numDistanceSensors()-1]</param>
         /// <returns></returns>
         [DllImport("rec_robotino_api2.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int Bumper_construct(uint n);
+        public static extern int Bumper_construct(int n);
 
         [DllImport("rec_robotino_api2.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int DistanceSensor_construct(uint n);
+        public static extern int DistanceSensor_construct(int n);
 
         /// <summary>
         /// Destroy the Digital input object assigned to id
@@ -214,7 +214,7 @@ namespace RobotinoController
         /// <param name="DistanceSensorId"></param>
         /// <returns>The heading in degrees. [0; 360]</returns>
         [DllImport("rec_robotino_api2.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-        public static extern uint DistanceSensor_heading(int DistanceSensorId);
+        public static extern int DistanceSensor_heading(int DistanceSensorId);
 
         #endregion
 
@@ -232,7 +232,7 @@ namespace RobotinoController
         /// <param name="id"> The id of the Camera object to be destroyed</param>
         /// <returns></returns>
         [DllImport("rec_robotino_api2.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool Camera_destroy(uint id);
+        public static extern bool Camera_destroy(int id);
 
         /// <summary>
         /// Associated an Camera object with a communication interface, i.e. binding the Camera to a specific Robotino
@@ -241,7 +241,7 @@ namespace RobotinoController
         /// <param name="comId"></param>
         /// <returns></returns>
         [DllImport("rec_robotino_api2.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool Camera_setComId(uint id, uint comId);
+        public static extern bool Camera_setComId(int id, int comId);
 
         /// <summary>
         /// Grab image.
@@ -249,7 +249,7 @@ namespace RobotinoController
         /// <param name="id"></param>
         /// <returns>return Returns TRUE (1) if a new image is available since the last call of Camera_grab. Returns FALSE (0) otherwise.</returns>
         [DllImport("rec_robotino_api2.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool Camera_grab(uint id);
+        public static extern bool Camera_grab(int id);
 
         /// <summary>
         /// Size of image aquired by grab.
@@ -259,7 +259,7 @@ namespace RobotinoController
         /// <param name="height"></param>
         /// <returns></returns>
         [DllImport("rec_robotino_api2.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool Camera_imageSize(uint id, [In, Out]uint width, [In, Out] uint height);
+        public static extern bool Camera_imageSize(int id, [In, Out]int width, [In, Out] int height);
 
         /// <summary>
         /// Get Robotino's camera image. Do not forget to call Camera_setStreaming( id, TRUE )  and Camera_grab first.
@@ -273,7 +273,7 @@ namespace RobotinoController
         /// <param name="height">Image height.</param>
         /// <returns></returns>
         [DllImport("rec_robotino_api2.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool Camera_getImage(uint id, byte[] imageBuffer, uint imageBufferSize, [In, Out]uint width, [In, Out]uint height);
+        public static extern bool Camera_getImage(int id, byte[] imageBuffer, int imageBufferSize, [In, Out]int width, [In, Out]int height);
 
 
         /// <summary>
@@ -283,7 +283,7 @@ namespace RobotinoController
         /// <param name="streaming">streaming If TRUE (1) streaming is started. Otherwise streaming is stopped.</param>
         /// <returns></returns>
         [DllImport("rec_robotino_api2.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool Camera_setStreaming(uint id, bool streaming);
+        public static extern bool Camera_setStreaming(int id, bool streaming);
         #endregion
     }
 
@@ -292,6 +292,7 @@ namespace RobotinoController
         private int com;
         private int omniDrive;
         private int[] distanceSensor=new int[9];
+        private int cameraID;
 
         public delegate void ChangedEvent(float speedX, float speedY, float rot);
         public event ChangedEvent mChangedEvent;
@@ -306,13 +307,42 @@ namespace RobotinoController
             omniDrive = CDLL.OmniDrive_construct();
             for (int i = 0; i < 9; i++)
             {
-                distanceSensor[i] = CDLL.DistanceSensor_construct((uint)i);
+                distanceSensor[i] = CDLL.DistanceSensor_construct((int)i);
                 if (!CDLL.DistanceSensor_setComId(distanceSensor[i], com)) throw new Exception("Cann't set DistanceSensor");
             }
             if (!CDLL.OmniDrive_setComId(omniDrive, com)) throw new Exception("Cann't set OmniDrive");
-             
-         
+
+            cameraID = CDLL.Camera_construct();
+            var ok= CDLL.Camera_setComId(cameraID, com);
+              ok = CDLL.Camera_setStreaming(cameraID, true);
+            
         }
+
+        public void Grab()
+        {
+            const int imageBufferSize = 0xfffff;
+            byte[] imageBuffer =new byte[0xfffff];
+              
+            int imageWidth=0;
+            int imageHeight=0;
+
+            uint imageCounter = 0;
+
+            if (CDLL.Com_isConnected(com) )
+            {
+                if (CDLL.Camera_grab(cameraID))
+                {
+                    CDLL.Camera_imageSize(cameraID,   imageWidth,  imageHeight);
+
+                    Console.WriteLine("Received image {0}\n  width:{1}  height:{2}\n", imageCounter, imageWidth, imageHeight);
+
+                    CDLL.Camera_getImage(cameraID, imageBuffer, imageBufferSize, imageWidth, imageHeight);
+                      
+                }
+                 
+            }
+        }
+
         public void DisConnect()
         {
             if (!CDLL.Com_disconnect(com)) throw new Exception("Disconnect fail!");

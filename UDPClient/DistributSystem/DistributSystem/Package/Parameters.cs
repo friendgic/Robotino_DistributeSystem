@@ -20,43 +20,33 @@ namespace DistributeSystem
         #endregion
 
         #region Interface
-        public string name
+        public void SetName(string value)
         {
-            get
-            {
-                return v_name;
-            }
-            set
-            {
                 v_name = value;
                 c_name = true;
-            }
         }
-        public float speed_x
+        public void SetSpeedX(float value)
         {
-            get { return v_Movement[0]; }
-            set {
-                lock (locker)
-                {
-
-                v_Movement[0] = value; c_Movement = true;
-                }
-                }
+            v_Movement[0] = value;
+            c_Movement = true;
         }
-        public float speed_y
+        public void SetSpeedY(float value)
         {
-            get { return v_Movement[1]; }
-            set
-            {
-                lock (locker)
-                { v_Movement[1] = value; c_Movement = true; }
-            }
+            v_Movement[1] = value;
+            c_Movement = true;
         }
-        public float rot
+        public void SetRot(float value)
         {
-            get { return v_Movement[2]; }
-            set 
-            {  lock (locker){ v_Movement[2] = value; c_Movement = true; } }
+            v_Movement[2] = value;
+            c_Movement = true;
+        }
+     
+        public void SetMovement(float x,float y, float rot)
+        {
+            v_Movement[0] = x;
+            v_Movement[1] = y;
+            v_Movement[2] = rot;
+            c_Movement = true;
         }
         public bool changed
         {
@@ -129,8 +119,6 @@ namespace DistributeSystem
                 }
             }
         }
-
         #endregion
-
     }
 }

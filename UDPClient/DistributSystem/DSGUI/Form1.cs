@@ -102,9 +102,9 @@ namespace DSGUI
                     if (showingParamerAgent != null)
                     {
                         var par = showingParamerAgent.parameters;
-                        listBox2.Items[0] = string.Format("Name:{0}",par.name);
-                        listBox2.Items[1] = string.Format("Speed:{0},{1}", par.speed_x,par.speed_y);
-                        listBox2.Items[2] = string.Format("Rotation:{0}", par.rot);
+                        listBox2.Items[0] = string.Format("Name:{0}",par.v_name);
+                        listBox2.Items[1] = string.Format("Speed:{0},{1}", par.v_Movement[0],par.v_Movement[1]);
+                        listBox2.Items[2] = string.Format("Rotation:{0}", par.v_Movement[2]);
                         listBox2.Items[3] = string.Format("DisSensor:{0}  {1} ", par.v_DisSensor[2], par.v_DisSensor[3]);
                     }
                     else
@@ -142,9 +142,19 @@ namespace DSGUI
         {
             if (robotAgent.Active)
             {
-                dt = DateTime.Now;
-                timer3.Start();
+                var speedx = robotAgent.parameters.v_Movement[0];
+                robotAgent.parameters.SetSpeedX(speedx + 1);
             }
+            //if (robotAgent.Active)
+            //{
+            //    dt = DateTime.Now;
+            //    timer3.Start();
+            //}
+            //if (robotAgent.Active)
+            //{
+            //    robotAgent.robot.Grab();
+            //}
+
         }
 
         private void listBox3_SelectedIndexChanged(object sender, EventArgs e)
@@ -208,7 +218,7 @@ namespace DSGUI
             {
                 if (robotAgent.Active)
                 {
-                    robotAgent.parameters.name = "Robot 1";
+                    robotAgent.parameters.SetName("Robot 1");
                 }
                 timer2.Start();
             }
@@ -227,14 +237,14 @@ namespace DSGUI
 
                 if (robotAgent.Active)
                 {
-                    robotAgent.parameters.name = "Robot 2";
+                    robotAgent.parameters.SetName( "Robot 2");
 
                     var friends = robotAgent.friends;
                     FirstRobotIndex = -1;
                     for (int i = 0; i < friends.Count; i++)
                     {
                         var item = friends[i] as RobotAgent;
-                        if(item.parameters.name=="Robot 1")
+                        if(item.parameters.v_name=="Robot 1")
                         {
                             FirstRobotIndex = i;
                         }
@@ -330,6 +340,11 @@ namespace DSGUI
                     }
                 }
             }
+        }
+
+        private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }

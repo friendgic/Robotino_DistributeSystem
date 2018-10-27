@@ -6,10 +6,12 @@ using System.Text;
 
 namespace DistributeSystem
 {
+ 
     public class Configure
     {
         static public string name = "Robot 1";
         static public string IPprefix = "192.168";
+        static public bool LINUX = false;
 
         #region Interface
         static public void Save()
