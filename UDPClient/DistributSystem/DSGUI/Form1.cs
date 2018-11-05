@@ -140,20 +140,19 @@ namespace DSGUI
 
         private void button7_Click(object sender, EventArgs e)
         {
-            if (robotAgent.Active)
-            {
-                var speedx = robotAgent.parameters.v_Movement[0];
-                robotAgent.parameters.SetSpeedX(speedx + 1);
-            }
+            //if (robotAgent.Active)
+            //{
+            //    var speedx = robotAgent.parameters.v_Movement[0];
+            //    robotAgent.parameters.SetSpeedX(speedx + 1);
+            //}
             //if (robotAgent.Active)
             //{
             //    dt = DateTime.Now;
             //    timer3.Start();
             //}
-            //if (robotAgent.Active)
-            //{
-            //    robotAgent.robot.Grab();
-            //}
+            
+                robotAgent.robot.Grab();
+            
 
         }
 

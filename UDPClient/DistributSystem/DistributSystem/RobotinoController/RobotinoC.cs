@@ -128,7 +128,7 @@ namespace RobotinoController
         /// <param name="omega">Angular velocity in deg/s</param>
         /// <returns></returns>
         [DllImport("rec_robotino_api2.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool OmniDrive_project(int OmniDriveId, [In, Out]  float m1, [In, Out] float m2, [In, Out] float m3, float vx, float vy, float omega);
+        public static extern bool OmniDrive_project(int OmniDriveId, ref  float m1, ref float m2, ref float m3, float vx, float vy, float omega);
         #endregion
 
         #region PowerManagement
@@ -259,7 +259,7 @@ namespace RobotinoController
         /// <param name="height"></param>
         /// <returns></returns>
         [DllImport("rec_robotino_api2.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool Camera_imageSize(int id, [In, Out]int width, [In, Out] int height);
+        public static extern bool Camera_imageSize(int id, ref int width, ref int height);
 
         /// <summary>
         /// Get Robotino's camera image. Do not forget to call Camera_setStreaming( id, TRUE )  and Camera_grab first.
@@ -273,7 +273,7 @@ namespace RobotinoController
         /// <param name="height">Image height.</param>
         /// <returns></returns>
         [DllImport("rec_robotino_api2.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool Camera_getImage(int id, byte[] imageBuffer, int imageBufferSize, [In, Out]int width, [In, Out]int height);
+        public static extern bool Camera_getImage(int id, byte[] imageBuffer, int imageBufferSize, ref int width, ref int height);
 
 
         /// <summary>
@@ -293,6 +293,8 @@ namespace RobotinoController
         private int omniDrive;
         private int[] distanceSensor=new int[9];
         private int cameraID;
+        private int imageBufferSize = 0xfffff;
+        private byte[] imageBuffer = new byte[0xfffff];
 
         public delegate void ChangedEvent(float speedX, float speedY, float rot);
         public event ChangedEvent mChangedEvent;
@@ -320,29 +322,25 @@ namespace RobotinoController
 
         public void Grab()
         {
-            const int imageBufferSize = 0xfffff;
-            byte[] imageBuffer =new byte[0xfffff];
-              
             int imageWidth=0;
             int imageHeight=0;
 
             uint imageCounter = 0;
-
+            var dt = DateTime.Now;
             if (CDLL.Com_isConnected(com) )
             {
                 if (CDLL.Camera_grab(cameraID))
                 {
-                    CDLL.Camera_imageSize(cameraID,   imageWidth,  imageHeight);
-
-                    Console.WriteLine("Received image {0}\n  width:{1}  height:{2}\n", imageCounter, imageWidth, imageHeight);
-
-                    CDLL.Camera_getImage(cameraID, imageBuffer, imageBufferSize, imageWidth, imageHeight);
-                      
+                    CDLL.Camera_imageSize(cameraID,  ref imageWidth, ref imageHeight);
+                    imageBufferSize = 3 * imageWidth * imageHeight;
+                    CDLL.Camera_getImage(cameraID, imageBuffer, imageBufferSize,ref imageWidth,ref imageHeight);
                 }
-                 
             }
         }
-
+        public byte[] getImageBuffer()
+        {
+            return imageBuffer;
+        }
         public void DisConnect()
         {
             if (!CDLL.Com_disconnect(com)) throw new Exception("Disconnect fail!");

@@ -50,8 +50,7 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="DistributSystem, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="DistributSystem">
       <HintPath>..\DistributSystem\bin\x86\Debug\DistributSystem.dll</HintPath>
     </Reference>
     <Reference Include="System" />

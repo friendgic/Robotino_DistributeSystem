@@ -12,13 +12,16 @@ namespace DistributeSystem
         static public string name = "Robot 1";
         static public string IPprefix = "192.168";
         static public bool LINUX = false;
+        static public bool debug = true;
 
         #region Interface
         static public void Save()
         {
             NetworkPackage pack = new NetworkPackage();
             pack.Add("name", name);
-            pack.Add("IPprefix",IPprefix);
+            pack.Add("IPprefix", IPprefix);
+            pack.Add("LINUX", LINUX);
+            pack.Add("debug", debug);
             string str = pack.SerializeJson();
 
             string path = System.Environment.CurrentDirectory + @"/Confige.dat";
@@ -37,6 +40,8 @@ namespace DistributeSystem
                 dp.DeserializeJson(readText);
                 name = (string)dp.GetFromJson("name");
                 IPprefix = (string)dp.GetFromJson("IPprefix");
+                LINUX = (bool)dp.GetFromJson("LINUX");
+                debug = (bool)dp.GetFromJson("debug");
             }
             catch (Exception e)
             {

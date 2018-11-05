@@ -20,7 +20,6 @@ namespace DistributeSystem
         public int MsgQueueLength = 15;
         #endregion
 
-
         #region Thread
 
         ~ThreadBase()
@@ -90,7 +89,6 @@ namespace DistributeSystem
         }
 
         #endregion
-
 
         #region Utility
 
